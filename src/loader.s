@@ -1,4 +1,4 @@
-; src/boot.asm
+; src/loader.s
 BITS 32
 
 ; --- Multiboot header (GRUB procura isso no começo do ELF) ---
@@ -18,13 +18,23 @@ kernel_stack:                                ; label aponta para o início da me
 
 SECTION .text
 global _start
+extern sum_of_three                           ; função definida em outro lugar
 
 _start:
     ; Inicializa stack do kernel
     mov esp, kernel_stack + KERNEL_STACK_SIZE  ; aponta ESP para o topo da stack
 
-    ; "Hello Cafebabe": coloca 0xCAFEBABE no EAX
+    ; "Hello Cafebabe": coloca 0xCAFEBABE no 34
     mov eax, 0xCAFEBABE
+
+     ; --- Chamada de exemplo para sum_of_three ---
+    push dword 3            ; argumento 3
+    push dword 2            ; argumento 2
+    push dword 1            ; argumento 1
+    call sum_of_three       ; chama a função
+    add esp, 12             ; limpa os argumentos da stack (3 * 4 bytes)
+    ; resultado estará em EAX
+
 
 .hang:
     cli

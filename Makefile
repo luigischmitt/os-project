@@ -3,7 +3,7 @@ CC=gcc
 LD=ld
 NASM=nasm
 
-CFLAGS=-m32 -ffreestanding -O2 -Wall -Wextra -fno-pie -fno-stack-protector
+CFLAGS= -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -Werror
 LDFLAGS=-m elf_i386 -T linker.ld -nostdlib
 
 BUILD=build
@@ -14,14 +14,14 @@ all: $(ISO)
 $(BUILD):
 	mkdir -p $(BUILD)
 
-$(BUILD)/boot.o: src/boot.asm | $(BUILD)
+$(BUILD)/loader.o: src/loader.s | $(BUILD)
 	$(NASM) -f elf32 $< -o $@
 
-$(BUILD)/kernel.o: src/kernel.c | $(BUILD)
+$(BUILD)/kmain.o: src/kmain.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD)/kernel.elf: $(BUILD)/boot.o $(BUILD)/kernel.o linker.ld
-	$(LD) $(LDFLAGS) $(BUILD)/boot.o $(BUILD)/kernel.o -o $@
+$(BUILD)/kernel.elf: $(BUILD)/loader.o $(BUILD)/kmain.o linker.ld
+	$(LD) $(LDFLAGS) $(BUILD)/loader.o $(BUILD)/kmain.o -o $@
 
 $(ISO): $(BUILD)/kernel.elf
 	rm -rf dist iso/boot/kernel.elf

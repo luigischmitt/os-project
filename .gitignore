@@ -1,5 +1,0 @@
-build/kmain.o
-build/loader.o
-dist/os.iso
-build/kernel.elf
-iso/boot/kernel.elf

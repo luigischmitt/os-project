@@ -14,8 +14,8 @@ The kernel boots via GRUB using the Multiboot specification, transitions from as
 ## Project structure
 
 ```
-src/loader.s        Multiboot header and entry point (_start)
-src/kmain.c        C kernel with VGA text output
+src/boot.asm        Multiboot header and entry point (_start)
+src/kernel.c        C kernel with VGA text output
 linker.ld           Linker script (loads kernel at 1 MB)
 iso/boot/grub/      GRUB configuration for bootable ISO
 Makefile            Build and run targets

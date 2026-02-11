@@ -1,3 +1,8 @@
 bochslog.txt
 bochslog.txt
 bochslog.txt
+iso/boot/kernel.elf
+kernel.elf
+kmain.o
+loader.o
+os.iso

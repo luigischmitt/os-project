@@ -18,18 +18,15 @@ align 4                         ; the code must be 4 byte aligned
     dd FLAGS                    ; the flags,
     dd CHECKSUM                 ; and the checksum
 
-extern sum_of_three           ; declare sum_of_three as an external function
+extern kmain           ; declare kmain as an extern function
 
 loader:                         ; the loader label (defined as entry point in linker script)
     mov eax, 0xCAFEBABE         ; place the number 0xCAFEBABE in the register eax
     
     mov esp, kernel_stack + KERNEL_STACK_SIZE ; point esp to the start of the stack (end of memory area)
 
-    ; Call sum_of_three function with arguments 1, 2, 3
-    push dword 3                ; arg3
-    push dword 2                ; arg2
-    push dword 1                ; arg1
-    call sum_of_three           ; call the function, the result will be in eax
+
+    call kmain                  ; Calls the kmain function in kmain.c
 
 .loop:
     jmp .loop                   ; loop forever

@@ -5,6 +5,12 @@ FLAGS        equ 0x0            ; multiboot flags
 CHECKSUM     equ -MAGIC_NUMBER  ; calculate the checksum
                                     ; (magic number + checksum + flags should equal 0)
 
+section .multiboot
+align 4
+    dd MAGIC_NUMBER
+    dd FLAGS
+    dd CHECKSUM
+
 KERNEL_STACK_SIZE equ 4096      ; size of stack in bytes
 
 section .bss

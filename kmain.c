@@ -12,6 +12,7 @@
 #define FB_WIDTH  80
 #define FB_HEIGHT 25
 
+
 struct example {
     unsigned char config;      /* bit 0 - 7   */
     unsigned short address;    /* bit 8 - 23  */
@@ -19,6 +20,7 @@ struct example {
 } __attribute__((packed));     /* guarantees that the struct will have exactly 32 bits*/
 
 char *fb = (char *) 0x000B8000; // Pointer to the beginning of the memory
+static unsigned int cursor_pos = 0;
 
 /** fb_move_cursor:
  Moves the cursor of the framebuffer to the given position
@@ -48,9 +50,60 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
     fb[offset + 1] = ((fg & 0x0F) << 4) | (bg & 0x0F); // 2° turn. In this section, we define the foreground color and the background color
 }
 
-int write(char *buf, unsigned int len);
+void scroll()
+{
+    unsigned int i;
+
+    // Move todas as linhas para cima
+    for (i = 0; i < (FB_HEIGHT - 1) * FB_WIDTH; i++)
+    {
+        fb_write_cell(i,
+                      fb[2 * (i + FB_WIDTH)],
+                      2,
+                      0);
+    }
+
+    // Limpa última linha
+    for (i = (FB_HEIGHT - 1) * FB_WIDTH;
+         i < FB_HEIGHT * FB_WIDTH;
+         i++)
+    {
+        fb_write_cell(i, ' ', 2, 0);
+    }
+
+    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH;
+}
+
+int write(char *buf, unsigned int len)
+{
+    unsigned int i;
+
+    for (i = 0; i < len; i++)
+    {
+        char c = buf[i];
+
+        if (c == '\n')
+        {
+            cursor_pos += FB_WIDTH - (cursor_pos % FB_WIDTH);
+        }
+        else
+        {
+            fb_write_cell(cursor_pos, c, 2, 0);
+            cursor_pos++;
+        }
+
+        if (cursor_pos >= FB_WIDTH * FB_HEIGHT)
+        {
+            scroll();
+        }
+    }
+
+    fb_move_cursor(cursor_pos);
+
+    return len;
+}
 
 void kmain(void) {
 
-    fb_write_cell(0, 'A', FB_GREEN, FB_DARK_GREY);
+    write("Hello, Kernel!\n", 15);
 }

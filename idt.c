@@ -2,8 +2,7 @@
 #include "io.h"
 #include "pic.h"
 #include "serial.h"
-
-#define KBD_DATA_PORT 0x60 // Data Port of the keyboard
+#include "keyboard.h"
 
 struct idt_entry idt[256]; // IDT table
 struct idt_ptr idtp; // Pointer to the table
@@ -22,12 +21,6 @@ void idt_set_gate(unsigned char num, unsigned int base) { // Function to set the
 }
 
 
-unsigned char read_scan_code(void) // Function responsible for reading a scan code from the keyboard
-{
-    return inb(KBD_DATA_PORT);
-}
-
-
 void idt_init() { // Function that initialize the IDT table
     idtp.limit = (sizeof(struct idt_entry) * 256) - 1;
     idtp.base = (unsigned int)&idt;
@@ -42,12 +35,11 @@ void idt_init() { // Function that initialize the IDT table
 
 void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack) { // Function to act if a interrupt is caught
     if (interrupt == 33) {
-        unsigned char scancode = read_scan_code();
+        unsigned char letter = read_letter();
 
-        if (scancode == 0x01) { // 0x01 is ESC scancode
-            serial_write("Esc detected\n", 13);
-        }
+        char str[2] = {letter, '\0'};
 
+        serial_write(str, 1);
     }
 
     pic_acknowledge(interrupt);

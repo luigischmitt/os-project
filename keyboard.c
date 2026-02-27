@@ -22,7 +22,7 @@ unsigned char keyboard_map[128] = {
 
 unsigned char read_letter(void) // Function responsible for reading a letter from the keyboard
 {
-    return keyboard_map[read_scan_code()];
+  return keyboard_map[read_scan_code()];
 }
 
 unsigned char read_scan_code(void) // Function responsible for reading a scan code from the keyboard

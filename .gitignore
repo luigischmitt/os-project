@@ -5,3 +5,4 @@ iso/boot/kernel.elf
 kernel.elf
 os.iso
 *.o
+*.out

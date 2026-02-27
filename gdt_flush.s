@@ -1,7 +1,7 @@
 global gdt_flush
 
 gdt_flush:
-    ; gets the gdt_ptr struct pointer (from C)
+    ; Gets the gdt_ptr struct pointer (from C)
     mov eax, [esp+4]
 
     ; Loads the GDT into the processor
@@ -15,7 +15,7 @@ gdt_flush:
     mov gs, ax
     mov ss, ax
 
-    ; Far Jump to update CS to the code segment (index 1 → 0x08)
+    ; Far Jump to update CS segment selector to the code segment (index 1 → 0x08)
     jmp 0x08:flush_cs
 
 flush_cs:

@@ -6,7 +6,7 @@ struct gdt_ptr gp;
 extern void gdt_flush(unsigned int);
 
 static void gdt_set_segment(int num, unsigned int base, unsigned int limit, unsigned char access, unsigned char gran)
-{ // Function responsible for setting the segment fields
+{ // Function responsible for setting the segment fields with bitwise operations
     gdt[num].base_low = (base & 0xFFFF);
     gdt[num].base_middle = (base >> 16) & 0xFF;
     gdt[num].base_high = (base >> 24) & 0xFF;
@@ -32,5 +32,5 @@ void gdt_init(void)
     // Kernel data segment
     gdt_set_segment(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // index 2, base 0, limit 0xFFFFFFFF, access 0x92, granularity 0XCF
 
-    gdt_flush((unsigned int)&gp);
+    gdt_flush((unsigned int)&gp); // Call of the function in gdt_flush.s
 }

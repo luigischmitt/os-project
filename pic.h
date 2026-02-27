@@ -1,10 +1,10 @@
 #ifndef INCLUDE_PIC_H
 #define INCLUDE_PIC_H
 
-/* Configura o PIC para evitar conflitos com a CPU */
+/* Configures the PIC to avoid conflicts with the CPU */
 void pic_remap();
 
-/* Confirma para o hardware que a interrupção foi tratada */
+/* Confirms to the hardware that the interrupt has been solved */
 void pic_acknowledge(unsigned int interrupt);
 
 #endif

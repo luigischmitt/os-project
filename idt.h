@@ -18,8 +18,8 @@ struct idt_entry {
 } __attribute__((packed));
 
 struct idt_ptr {
-    unsigned short limit; // Tamanho da IDT
-    unsigned int base; // Endereço inicial da IDT
+    unsigned short limit; // IDT size
+    unsigned int base; // IDT's base address
 } __attribute__((packed));
 
 void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack);

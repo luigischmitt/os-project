@@ -9,14 +9,13 @@
 /* The I/O port commands */
 #define FB_HIGH_BYTE_COMMAND    14 // 1° turn, 
 #define FB_LOW_BYTE_COMMAND     15 // 2° turn
-/* The framebuffer limits*/
+/* The framebuffer limits */
 #define FB_WIDTH  80
 #define FB_HEIGHT 25
 
 
-char *fb = (char *) 0x000B8000; // Pointer to the beginning of the memory
-static unsigned int cursor_pos = 0;
-
+char *fb = (char *) 0x000B8000; // Pointer to the beginning of the framebuffer
+static unsigned int cursor_pos = 0; // Cursor position
 
 /** fb_move_cursor:
  Moves the cursor of the framebuffer to the given position
@@ -61,13 +60,13 @@ void scroll()
         fb_write_cell(i, fb[2 * (i + FB_WIDTH)], 2, 0);
     }
 
-    // Clears the last line
+    // Clears the last line on the frame buffer
     for (i = (FB_HEIGHT - 1) * FB_WIDTH; i < FB_HEIGHT * FB_WIDTH; i++)
     {
         fb_write_cell(i, ' ', 2, 0);
     }
 
-    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH; 
+    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH;
 }
 
 
@@ -81,7 +80,7 @@ int fb_write(char *buf, unsigned int len)
 {
     unsigned int i;
 
-    for (i = 0; i < len; i++)
+    for (i = 0; i < len; i++) // travel around the string
     {
         char c = buf[i]; 
 
@@ -91,8 +90,8 @@ int fb_write(char *buf, unsigned int len)
         }
         else
         {
-            fb_write_cell(cursor_pos, c, 2, 0);
-            cursor_pos++;
+            fb_write_cell(cursor_pos, c, 2, 0); // Writes the current character
+            cursor_pos++; // Increments the position
         }
 
         if (cursor_pos >= FB_WIDTH * FB_HEIGHT) // Verifies if the framebuffer is full
@@ -101,7 +100,7 @@ int fb_write(char *buf, unsigned int len)
         }
     }
 
-    fb_move_cursor(cursor_pos);
+    fb_move_cursor(cursor_pos); // Updates the frame buffer cursor
 
     return len;
 }

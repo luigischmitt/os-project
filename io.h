@@ -3,10 +3,10 @@
 
 
 /** inb:
- *  Read a byte from an I/O port.
- *
- *  @param  port The address of the I/O port
- *  @return      The read byte
+ *  Read a byte from an I/O port. Defined in io.s
+ * 
+ *  @param port The address of the I/O port
+ *  @return The read byte
  */
 unsigned char inb(unsigned short port);
 

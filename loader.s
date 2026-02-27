@@ -3,9 +3,9 @@ global loader                   ; the entry symbol for ELF
 MAGIC_NUMBER equ 0x1BADB002     ; define the magic number constant
 FLAGS        equ 0x0            ; multiboot flags
 CHECKSUM     equ -MAGIC_NUMBER  ; calculate the checksum
-                                    ; (magic number + checksum + flags should equal 0)
+                                ; (magic number + checksum + flags should equal 0)
 
-section .multiboot
+section .multiboot              ;Multiboot
 align 4
     dd MAGIC_NUMBER
     dd FLAGS

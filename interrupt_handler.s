@@ -33,6 +33,7 @@ no_error_code_interrupt_handler 32 ; Timer (IRQ 0 + 32)
 no_error_code_interrupt_handler 33 ; Keyboard (IRQ 1 + 32)
 
 load_idt:
+; Function to load the IDT in the processor
     mov eax, [esp + 4] 
     lidt [eax] 
     ret

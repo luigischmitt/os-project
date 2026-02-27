@@ -7,9 +7,9 @@
 
 void kmain(void) {
     gdt_init(); // Call of the function that initializes the GDT - Memory
+    serial_init(); // Call of the function that initializes the Serial Driver
     pic_remap(); // Call of the function to remap the PIC
     idt_init(); // Call of the function that initializes the IDT - handler table
-    serial_init(); // Call of the function that initializes the Serial Driver
     
     // Interruption
     __asm__("sti");

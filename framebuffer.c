@@ -15,7 +15,7 @@
 
 
 char *fb = (char *) 0x000B8000; // Pointer to the beginning of the framebuffer
-static unsigned int cursor_pos = 0; // Cursor position
+static unsigned short cursor_pos = 0; // Cursor position
 
 /** fb_move_cursor:
  Moves the cursor of the framebuffer to the given position

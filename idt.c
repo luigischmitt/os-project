@@ -2,6 +2,7 @@
 #include "io.h"
 #include "pic.h"
 #include "serial.h"
+#include "framebuffer.h"
 #include "keyboard.h"
 
 struct idt_entry idt[256]; // IDT table
@@ -37,9 +38,12 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
     if (interrupt == 33) {
         unsigned char letter = read_letter();
 
-        char str[2] = {letter, '\0'};
+        if(letter != '\0'){
+            char str[2] = {letter, '\0'};
 
-        serial_write(str, 1);
+            fb_write(str, 1);
+            serial_write(str, 1);
+        }
     }
 
     pic_acknowledge(interrupt);

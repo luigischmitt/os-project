@@ -6,10 +6,10 @@
 #include "idt.h"
 
 void kmain(void) {
-    gdt_init(); // Call of the function that initializes the GDT
-    idt_init(); // Call of the function that initializes the IDT
+    gdt_init(); // Call of the function that initializes the GDT - Memory
     pic_remap(); // Call of the function to remap the PIC
-    serial_init();
+    idt_init(); // Call of the function that initializes the IDT - handler table
+    serial_init(); // Call of the function that initializes the Serial Driver
     
     // Interruption
     __asm__("sti");

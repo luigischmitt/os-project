@@ -66,7 +66,7 @@ void scroll()
         fb_write_cell(i, ' ', 2, 0);
     }
 
-    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH;
+    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH; // Updates the cursor to the last line
 }
 
 

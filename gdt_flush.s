@@ -15,7 +15,7 @@ gdt_flush:
     mov gs, ax
     mov ss, ax
 
-    ; Far Jump to update CS segment selector to the code segment (index 1 → 0x08)
+    ; Far Jump to update CS segment selector to the code segment (index 1 → 0x08), we do this because of the secure mode
     jmp 0x08:flush_cs
 
 flush_cs:

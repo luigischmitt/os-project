@@ -23,7 +23,7 @@ common_interrupt_handler:
 
     popad                                   ; restore the registers
 
-    add esp, 8                              ; restore the esp (limpa o num da interrupção e o erro)
+    add esp, 8                              ; restore the esp (clears the interrupt number and the error)
 
     iret                                    ; return to the code that got interrupted
 

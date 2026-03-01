@@ -14,8 +14,8 @@ The kernel boots via GRUB using the Multiboot specification, transitions from as
 ## Project structure
 
 ```
-src/loader.s        Multiboot header and entry point (_start)
-src/kmain.c        C kernel with VGA text output
+src/boot.asm        Multiboot header and entry point (_start)
+src/kernel.c        C kernel with VGA text output
 linker.ld           Linker script (loads kernel at 1 MB)
 iso/boot/grub/      GRUB configuration for bootable ISO
 Makefile            Build and run targets
@@ -23,41 +23,24 @@ Dockerfile          Cross-compilation environment (x86 toolchain)
 ```
 
 ## Prerequisites
-
-- [Docker](https://www.docker.com/)
-- [QEMU](https://www.qemu.org/) (for running the ISO)
-
-On macOS:
-
-```sh
-brew install qemu
-```
-
-## Build
-
-Build the Docker image (first time only):
-
-```sh
-docker build -t os-project .
-```
-
-Compile the kernel and generate the bootable ISO:
-
-```sh
-docker run --rm -it -v "$PWD":/work os-project make
-```
-
+make -j$(nproc)
+sudo make install
+- sudo apt update
+- sudo apt install build-essential libsdl1.2-dev wget tar
+- sudo apt install bochsbios vgabios
+- BOCHS 2.7 : wget https://downloads.sourceforge.net/project/bochs/bochs/2.7/bochs-2.7.tar.gz
+- tar xvf bochs-2.7.tar.gz
+- cd bochs-2.7
+- ./configure --enable-x86-64 --with-sdl --enable-gdb-stub --enable-all-optimizations
+- make -j$(nproc)
+- sudo make install
 ## Run
 
-```sh
-qemu-system-i386 -cdrom dist/os.iso
-```
+- make run
 
 ## Clean
 
-```sh
-docker run --rm -it -v "$PWD":/work os-project make clean
-```
+- make clean
 
 ## References
 

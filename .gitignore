@@ -1,5 +1,8 @@
-build/kmain.o
-build/loader.o
-dist/os.iso
-build/kernel.elf
+bochslog.txt
+bochslog.txt
+bochslog.txt
 iso/boot/kernel.elf
+kernel.elf
+os.iso
+*.o
+*.out

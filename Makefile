@@ -1,38 +1,37 @@
-# Makefile
-CC=gcc
-LD=ld
-NASM=nasm
+OBJECTS = loader.o kmain.o io.o framebuffer.o serial.o gdt.o gdt_flush.o interrupt_handler.o idt.o pic.o keyboard.o
+CC = gcc
+CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
+	-nostartfiles -nodefaultlibs -Wall -Wextra -c
+LDFLAGS = -T link.ld -melf_i386
+AS = nasm
+ASFLAGS = -f elf
 
-CFLAGS= -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -Werror
-LDFLAGS=-m elf_i386 -T linker.ld -nostdlib
+all: kernel.elf
 
-BUILD=build
-ISO=dist/os.iso
+kernel.elf: $(OBJECTS)
+	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 
-all: $(ISO)
+os.iso: kernel.elf
+	cp kernel.elf iso/boot/kernel.elf
+	genisoimage -R                              \
+		-b boot/grub/stage2_eltorito    \
+		-no-emul-boot                   \
+		-boot-load-size 4               \
+		-A os                           \
+		-input-charset utf8             \
+		-quiet                          \
+		-boot-info-table                \
+		-o os.iso                       \
+		iso
 
-$(BUILD):
-	mkdir -p $(BUILD)
+run: os.iso
+	bochs -f bochsrc.txt -q
 
-$(BUILD)/loader.o: src/loader.s | $(BUILD)
-	$(NASM) -f elf32 $< -o $@
+%.o: %.c
+	$(CC) $(CFLAGS)  $< -o $@
 
-$(BUILD)/kmain.o: src/kmain.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/kernel.elf: $(BUILD)/loader.o $(BUILD)/kmain.o linker.ld
-	$(LD) $(LDFLAGS) $(BUILD)/loader.o $(BUILD)/kmain.o -o $@
-
-$(ISO): $(BUILD)/kernel.elf
-	rm -rf dist iso/boot/kernel.elf
-	mkdir -p dist
-	cp $(BUILD)/kernel.elf iso/boot/kernel.elf
-	grub-mkrescue -o $(ISO) iso >/dev/null 2>&1 || grub-mkrescue -o $(ISO) iso
-
-run: $(ISO)
-	qemu-system-i386 -cdrom $(ISO)
+%.o: %.s
+	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf $(BUILD) dist iso/boot/kernel.elf
-
-.PHONY: all run clean
+	rm -rf *.o kernel.elf os.iso *.out bochslog.txt

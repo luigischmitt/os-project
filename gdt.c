@@ -1,4 +1,5 @@
 #include "gdt.h"
+#include "serial.h"
 
 struct gdt_entry gdt[3];
 struct gdt_ptr gp;
@@ -20,6 +21,7 @@ static void gdt_set_segment(int num, unsigned int base, unsigned int limit, unsi
 
 void gdt_init(void)
 { // Function responsible for initializing the segments and the GDT
+    serial_write("Initializing GDT!\n", 18);
     gp.limit = (sizeof(struct gdt_entry) * 3) - 1; //The size of the GDT
     gp.base = (unsigned int)&gdt; // The address of the GDT
 
@@ -32,5 +34,6 @@ void gdt_init(void)
     // Kernel data segment
     gdt_set_segment(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // index 2, base 0, limit 0xFFFFFFFF, access 0x92, granularity 0XCF
 
+    serial_write("Loading GDT!\n", 13);
     gdt_flush((unsigned int)&gp); // Call of the function in gdt_flush.s
 }

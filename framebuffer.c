@@ -2,7 +2,7 @@
 #include "framebuffer.h"
 
 #define FB_GREEN 2
-#define FB_DARK_GREY 8
+#define FB_BLACK 0
 /* The I/O ports */
 #define FB_COMMAND_PORT         0x3D4
 #define FB_DATA_PORT            0x3D5
@@ -43,7 +43,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 {
     unsigned int offset = 2 * i;
     fb[offset] = c; //1° turn. In this part we define the character of the element that we are putting in the framebuffer.
-    fb[offset + 1] = ((fg & 0x0F) << 4) | (bg & 0x0F); // 2° turn. In this section, we define the foreground color and the background color
+    fb[offset + 1] = ((bg & 0x0F) << 4) | (fg & 0x0F); // 2° turn. In this section, we define the foreground color and the background color
 }
 
 
@@ -90,7 +90,7 @@ int fb_write(char *buf, unsigned int len)
         }
         else
         {
-            fb_write_cell(cursor_pos, c, 2, 0); // Writes the current character
+            fb_write_cell(cursor_pos, c, FB_GREEN, FB_BLACK); // Writes the current character
             cursor_pos++; // Increments the position
         }
 

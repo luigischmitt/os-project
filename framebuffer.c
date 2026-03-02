@@ -104,3 +104,12 @@ int fb_write(char *buf, unsigned int len)
 
     return len;
 }
+
+void fb_decrement_cursor_pos() {
+    if(cursor_pos <= 0) {
+        return; // Operação inválida, pois o cursor já está no 0
+    }
+
+    cursor_pos--;
+    fb_move_cursor(cursor_pos);
+}

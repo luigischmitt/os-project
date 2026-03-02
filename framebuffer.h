@@ -12,5 +12,6 @@ void scroll();
 
 int fb_write(char *buf, unsigned int len);
 
+void fb_decrement_cursor_pos();
 
 #endif

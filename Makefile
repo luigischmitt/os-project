@@ -11,7 +11,7 @@ all: kernel.elf
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 
-os.iso: kernel.elf
+os.iso: kernel.elf iso/modules/program
 	cp kernel.elf iso/boot/kernel.elf
 	genisoimage -R                              \
 		-b boot/grub/stage2_eltorito    \
@@ -23,6 +23,9 @@ os.iso: kernel.elf
 		-boot-info-table                \
 		-o os.iso                       \
 		iso
+
+iso/modules/program: iso/modules/program.s
+	nasm -f bin $< -o $@
 
 run: os.iso
 	bochs -f bochsrc.txt -q

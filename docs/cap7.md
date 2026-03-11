@@ -24,9 +24,10 @@
 
 ## Multiboot e passagem de argumentos
 
-- Antes de executar, é preciso identificar aonde estão os módulos e passar o endereço para `kmain()` como argumento, que estará no registrador `ebx`.
+- Antes de executar, é preciso identificar aonde estão os módulo e passar o endereço para `kmain()` como argumento, que estará no registrador `ebx`.
 
-- Precisamos então fazer o download da multiboot structure, num `multiboot.h` que foi fornecido pelo livro (o link do livro não funcionava mais, tive que procurar na internet), e então alterar os argumentos do `kmain()` e adicionar duas linhas que manipulam este endereço.
+- Precisamos para isso fazer o download da multiboot structure, num `multiboot.h` que foi fornecido pelo livro (o link do livro não funcionava mais, tive que procurar na internet), e então alterar os argumentos do `kmain()` e adicionar duas linhas que manipulam este endereço.
+    - O multiboot.h define as structs e constantes do padrão Multiboot no kernel, permitindo interpretar a estrutura multiboot_info que o GRUB preenche na memória, onde fica a lista de módulos carregados e seus endereços.
 
 - Link usado para conseguir o `multiboot.h`: <https://www.gnu.org/software/grub/manual/multiboot/html_node/multiboot_002eh.html>
 

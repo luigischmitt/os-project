@@ -41,10 +41,12 @@ enable_paging:
     push ebp    
     mov ebp, esp
     
+    ;This part is responsible for setting the page frame size to 4MB
     mov eax, cr4 ; read current cr4
     or eax, 0x00000010 ; Set the PSE bit
     mov cr4, eax ; update cr4
 
+    ;This part is to set the paging as true
     mov eax, cr0 ; read current cr0
     or eax, 0x80000000 ; set the PG bit to 1
     mov cr0, eax ; update cr0
@@ -58,8 +60,10 @@ enable_paging:
 invalidate_tlb:
     push ebp
     mov ebp, esp
+
     mov eax, [ebp+8] ; Gets the first argument from C, the virtual address that will be removed
     invlpg [eax] ; Execute the assembly instruction that will remove the virtual address
+    
     mov esp, ebp
     pop ebp
     ret

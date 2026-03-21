@@ -5,10 +5,11 @@
 #include "pic.h"
 #include "idt.h"
 #include "multiboot.h"
+#define VIRTUAL_KERNEL_BASE 0xC0000000
 
 void kmain(unsigned int ebx) {
 
-    multiboot_info_t *mbinfo = (multiboot_info_t *) ebx ;
+    multiboot_info_t *mbinfo = (multiboot_info_t *) ebx + VIRTUAL_KERNEL_BASE;
 
     serial_init(); // Call of the function that initializes the Serial Driver
     gdt_init(); // Call of the function that initializes the GDT - Memory
@@ -31,9 +32,9 @@ void kmain(unsigned int ebx) {
     
     // Checagem do intervalo de memória do módulo carregado, para evitar tentativas de ler o
     // código de um módulo inválido e causar comportamento indevido.
-    multiboot_module_t *mods = (multiboot_module_t *) (mbinfo->mods_addr + 0xC0000000);
-    unsigned int module_start = mods[0].mod_start + 0xC0000000;
-    unsigned int module_end   = mods[0].mod_end + 0xC0000000;
+    multiboot_module_t *mods = (multiboot_module_t *) (mbinfo->mods_addr + VIRTUAL_KERNEL_BASE);
+    unsigned int module_start = mods[0].mod_start + VIRTUAL_KERNEL_BASE;
+    unsigned int module_end   = mods[0].mod_end + VIRTUAL_KERNEL_BASE;
     
     if (module_start >= module_end) {
         fb_write("Erro: modulo invalido\n", 22);

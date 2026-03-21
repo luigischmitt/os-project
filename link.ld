@@ -1,8 +1,16 @@
 ENTRY(loader)                /* the name of the entry label */
 
 
+
+
 SECTIONS {
     . = 0xC0100000; /* the code should be relocated to 3GB + 1MB -> VMA*/
+
+
+    /* Kernel start Labels */
+	kernel_virtual_start = .;
+	kernel_physical_start = . - 0xC0000000;
+
 
     .multiboot ALIGN(4) : AT(ADDR(.multiboot) - 0xC0000000)
     {
@@ -29,4 +37,8 @@ SECTIONS {
         *(COMMON)            /* all COMMON sections from all files */
         *(.bss)              /* all bss sections from all files */
     }
+
+    /* Kernel end Labels */
+    kernel_virtual_end = .;
+    kernel_physical_end = . - 0xC0000000;
 }

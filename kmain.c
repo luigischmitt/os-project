@@ -7,6 +7,13 @@
 #include "multiboot.h"
 #define VIRTUAL_KERNEL_BASE 0xC0000000
 
+// Kernel limits
+extern char kernel_virtual_start[];
+extern char kernel_virtual_end[];
+extern char kernel_physical_start[];
+extern char kernel_physical_end[];
+
+
 void kmain(unsigned int ebx) {
 
     multiboot_info_t *mbinfo = (multiboot_info_t *) (ebx + VIRTUAL_KERNEL_BASE);
@@ -32,7 +39,7 @@ void kmain(unsigned int ebx) {
     
     // Checagem do intervalo de memória do módulo carregado, para evitar tentativas de ler o
     // código de um módulo inválido e causar comportamento indevido.
-    multiboot_module_t *mods = (multiboot_module_t *) (mbinfo->mods_addr + VIRTUAL_KERNEL_BASE);
+    multiboot_module_t *mods = (multiboot_module_t *) ((unsigned int)mbinfo->mods_addr + VIRTUAL_KERNEL_BASE);
     unsigned int module_start = mods[0].mod_start + VIRTUAL_KERNEL_BASE;
     unsigned int module_end   = mods[0].mod_end + VIRTUAL_KERNEL_BASE;
     

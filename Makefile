@@ -37,4 +37,4 @@ run: os.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf os.iso *.out bochslog.txt iso/modules/program
+	rm -rf *.o kernel.elf os.iso *.out bochslog.txt iso/modules/program iso/boot/kernel.elf

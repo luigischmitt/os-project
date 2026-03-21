@@ -6,3 +6,4 @@ kernel.elf
 os.iso
 *.o
 *.out
+iso/modules/program

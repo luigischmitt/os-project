@@ -1,10 +1,10 @@
 ENTRY(loader)                /* the name of the entry label */
 
-. = 0xC0100000; /* the code should be relocated to 3GB + 1MB -> VMA*/
 
 SECTIONS {
+    . = 0xC0100000; /* the code should be relocated to 3GB + 1MB -> VMA*/
 
-    .multiboot ALIGN(4) :
+    .multiboot ALIGN(4) : AT(ADDR(.multiboot) - 0xC0000000)
     {
         *(.multiboot)
     }

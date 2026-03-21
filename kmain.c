@@ -9,7 +9,7 @@
 
 void kmain(unsigned int ebx) {
 
-    multiboot_info_t *mbinfo = (multiboot_info_t *) ebx + VIRTUAL_KERNEL_BASE;
+    multiboot_info_t *mbinfo = (multiboot_info_t *) (ebx + VIRTUAL_KERNEL_BASE);
 
     serial_init(); // Call of the function that initializes the Serial Driver
     gdt_init(); // Call of the function that initializes the GDT - Memory

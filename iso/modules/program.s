@@ -2,7 +2,7 @@ BITS 32
 
 ; Mensagem curta no canto superior esquerdo da tela do Bochs.
 ; Cada caractere em text mode ocupa 2 bytes: [char][atributo].
-mov edi, 0xB8000
+mov edi, 0xC00B8000
 mov ah, 0x1F                 ; branco sobre azul
 
 mov al, 'M'  ; "MOD LOOP"

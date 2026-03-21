@@ -14,7 +14,7 @@
 #define FB_HEIGHT 25
 
 
-char *fb = (char *) 0x000B8000; // Pointer to the beginning of the framebuffer
+char *fb = (char *) 0xC00B8000; // Pointer to the beginning of the framebuffer, now considering the 3GB headstart of the kernel in the virtual memory.
 static unsigned short cursor_pos = 0; // Cursor position
 
 /** fb_move_cursor:

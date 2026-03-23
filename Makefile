@@ -1,4 +1,4 @@
-OBJECTS = loader.o kmain.o io.o framebuffer.o serial.o gdt.o gdt_flush.o interrupt_handler.o idt.o pic.o keyboard.o
+OBJECTS = loader.o kmain.o io.o framebuffer.o serial.o gdt.o gdt_flush.o interrupt_handler.o idt.o pic.o keyboard.o pmm.o vmm.o kheap.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -c
@@ -37,4 +37,4 @@ run: os.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf os.iso *.out bochslog.txt
+	rm -rf *.o kernel.elf os.iso *.out bochslog.txt iso/modules/program iso/boot/kernel.elf

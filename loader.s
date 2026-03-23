@@ -78,21 +78,7 @@ higher_half:
 .loop:
     jmp .loop                   ; loop forever
 
-;Funtion that will activate paging with C
-enable_paging:
-    push ebp    
-    mov ebp, esp
-    
-    ;This part is to set the paging as true
-    mov eax, cr0 ; read current cr0
-    or eax, 0x80000000 ; set the PG bit to 1
-    mov cr0, eax ; update cr0
 
-    ; We don't use the CR4 here, because we aren't using 4MB page frames.
-    
-    mov esp, ebp
-    pop ebp
-    ret
 
 ; Function that removes a VMA from TLB cache with C
 invalidate_tlb:
@@ -102,17 +88,6 @@ invalidate_tlb:
     mov eax, [ebp+8] ; Gets the first argument from C, the VMA that will be removed
     invlpg [eax] ; Execute the assembly instruction that will remove the VMA from the TLB
     
-    mov esp, ebp
-    pop ebp
-    ret
-
-;Function that loads the paging directory in cr3 With C
-; The book recommended the creation of this function for future purposes
-load_page_directory:
-    push ebp
-    mov ebp, esp
-    mov eax, [ebp+8] ; C first argument
-    mov cr3, eax ; Loads in cr3
     mov esp, ebp
     pop ebp
     ret

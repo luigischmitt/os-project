@@ -1,5 +1,4 @@
 #include "pmm.h"
-#include "paging.h"
 
 #define VIRTUAL_KERNEL_BASE         0xC0000000U
 #define PMM_PAGE_PRESENT            0x1U
@@ -9,7 +8,6 @@
 #define P_TO_V(p)  ((unsigned int)(p) + VIRTUAL_KERNEL_BASE)
 #define V_TO_P(p)  ((unsigned int)(p) - VIRTUAL_KERNEL_BASE)
 
-extern unsigned int boot_page_table1[];
 extern char kernel_physical_start[];
 extern char kernel_physical_end[];
 
@@ -145,7 +143,7 @@ static unsigned int find_bitmap_region(multiboot_info_t *mbinfo, unsigned int bi
     return 0U;
 }
 
-static int bit_test(unsigned int frame_index)
+static int is_bit_used(unsigned int frame_index)
 {
     if (pmm_bitmap == 0) {
         return 1;
@@ -153,12 +151,12 @@ static int bit_test(unsigned int frame_index)
     return pmm_bitmap[frame_index / 32U] & (1U << (frame_index % 32U));
 }
 
-static void bit_set(unsigned int frame_index)
+static void set_used_bit(unsigned int frame_index)
 {
     pmm_bitmap[frame_index / 32U] |= (1U << (frame_index % 32U));
 }
 
-static void bit_clear(unsigned int frame_index)
+static void clear_used_bit(unsigned int frame_index)
 {
     pmm_bitmap[frame_index / 32U] &= ~(1U << (frame_index % 32U));
 }
@@ -169,8 +167,8 @@ static void mark_frame_used(unsigned int frame_index)
         return;
     }
 
-    if (!bit_test(frame_index)) {
-        bit_set(frame_index);
+    if (!is_bit_used(frame_index)) {
+        set_used_bit(frame_index);
         pmm_used_frame_count++;
     }
 }
@@ -181,8 +179,8 @@ static void mark_frame_free(unsigned int frame_index)
         return;
     }
 
-    if (bit_test(frame_index)) {
-        bit_clear(frame_index);
+    if (is_bit_used(frame_index)) {
+        clear_used_bit(frame_index);
         pmm_used_frame_count--;
     }
 }
@@ -318,18 +316,14 @@ void pmm_init(multiboot_info_t *mbinfo)
             reserve_region(modules[i].mod_start, modules[i].mod_end - modules[i].mod_start);
         }
     }
-
-    boot_page_table1[1023] = 0;
-    invalidate_tlb(PMM_TEMP_PAGE_VADDR);
 }
 
 unsigned int pmm_alloc_frame(void)
 {
     unsigned int frame_index;
 
-    
     for (frame_index = 0; frame_index < pmm_total_frame_count; frame_index++) {
-        if (!bit_test(frame_index)) {
+        if (!is_bit_used(frame_index)) {
             mark_frame_used(frame_index);
             return frame_index * PMM_FRAME_SIZE;
         }
@@ -342,34 +336,6 @@ void pmm_free_frame(unsigned int physical_address)
 {
     unsigned int frame_index = align_down(physical_address) / PMM_FRAME_SIZE;
     mark_frame_free(frame_index);
-}
-
-void *pmm_map_temporary(unsigned int physical_address)
-{
-    unsigned int frame_base = align_down(physical_address);
-
-    boot_page_table1[1023] = frame_base | PMM_PAGE_PRESENT | PMM_PAGE_WRITABLE;
-    invalidate_tlb(PMM_TEMP_PAGE_VADDR);
-
-    return (void *)PMM_TEMP_PAGE_VADDR;
-}
-
-void pmm_unmap_temporary(void)
-{
-    boot_page_table1[1023] = 0;
-    invalidate_tlb(PMM_TEMP_PAGE_VADDR);
-}
-
-void pmm_zero_frame(unsigned int physical_address)
-{
-    unsigned char *page = (unsigned char *)pmm_map_temporary(physical_address);
-    unsigned int i;
-
-    for (i = 0; i < PMM_FRAME_SIZE; i++) {
-        page[i] = 0;
-    }
-
-    pmm_unmap_temporary();
 }
 
 unsigned int pmm_total_frames(void)

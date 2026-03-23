@@ -1,17 +1,19 @@
 #include "pmm.h"
 #include "paging.h"
 
-#define VIRTUAL_KERNEL_BASE        0xC0000000U
-#define PMM_PAGE_PRESENT           0x1U
-#define PMM_PAGE_WRITABLE          0x2U
-#define PMM_LOW_MEMORY_LIMIT       0x00100000U
-#define PMM_BOOTSTRAP_MAP_LIMIT    0x00400000U
+#define VIRTUAL_KERNEL_BASE         0xC0000000U
+#define PMM_PAGE_PRESENT            0x1U
+#define PMM_PAGE_WRITABLE           0x2U
+#define PMM_LOW_MEMORY_LIMIT        0x00100000U
+#define PMM_BOOTSTRAP_MAP_LIMIT     0x00400000U
+#define P_TO_V(p)  ((unsigned int)(p) + VIRTUAL_KERNEL_BASE)
+#define V_TO_P(p)  ((unsigned int)(p) - VIRTUAL_KERNEL_BASE)
 
 extern unsigned int boot_page_table1[];
 extern char kernel_physical_start[];
 extern char kernel_physical_end[];
 
-static unsigned char *pmm_bitmap = 0;
+static unsigned int *pmm_bitmap = 0; 
 static unsigned int pmm_bitmap_size = 0;
 static unsigned int pmm_bitmap_physical_start = 0;
 static unsigned int pmm_total_frame_count = 0;
@@ -49,7 +51,7 @@ static int bitmap_region_overlaps_reserved(unsigned int candidate_start,
 {
     unsigned int kernel_start = (unsigned int)kernel_physical_start;
     unsigned int kernel_end = (unsigned int)kernel_physical_end;
-    unsigned int mbinfo_physical = (unsigned int)mbinfo - VIRTUAL_KERNEL_BASE;
+    unsigned int mbinfo_physical = V_TO_P(mbinfo);
     unsigned int i;
 
     if (ranges_overlap(candidate_start, candidate_length,
@@ -74,7 +76,7 @@ static int bitmap_region_overlaps_reserved(unsigned int candidate_start,
     }
 
     if (mbinfo->flags & MULTIBOOT_INFO_MODS) {
-        multiboot_module_t *modules = (multiboot_module_t *)(mbinfo->mods_addr + VIRTUAL_KERNEL_BASE);
+        multiboot_module_t *modules = (multiboot_module_t *)(P_TO_V(mbinfo->mods_addr));
         unsigned int module_count = mbinfo->mods_count;
 
         if (ranges_overlap(candidate_start, candidate_length,
@@ -106,9 +108,9 @@ static unsigned int clamp_range_end(multiboot_uint64_t address, multiboot_uint64
     return (unsigned int)end;
 }
 
-static unsigned int find_bitmap_region(multiboot_info_t *mbinfo, unsigned int bitmap_size)
+static unsigned int find_bitmap_region(multiboot_info_t *mbinfo, unsigned int bitmap_size_bytes)
 {
-    unsigned int mmap_current = mbinfo->mmap_addr + VIRTUAL_KERNEL_BASE;
+    unsigned int mmap_current = P_TO_V(mbinfo->mmap_addr);
     unsigned int mmap_end = mmap_current + mbinfo->mmap_length;
 
     while (mmap_current < mmap_end) {
@@ -125,11 +127,11 @@ static unsigned int find_bitmap_region(multiboot_info_t *mbinfo, unsigned int bi
 
             candidate = align_up(entry_start);
             while (candidate < entry_end) {
-                if (candidate + bitmap_size > entry_end) {
+                if (candidate + bitmap_size_bytes > entry_end) {
                     break;
                 }
 
-                if (!bitmap_region_overlaps_reserved(candidate, bitmap_size, mbinfo)) {
+                if (!bitmap_region_overlaps_reserved(candidate, bitmap_size_bytes, mbinfo)) {
                     return candidate;
                 }
 
@@ -148,18 +150,17 @@ static int bit_test(unsigned int frame_index)
     if (pmm_bitmap == 0) {
         return 1;
     }
-
-    return pmm_bitmap[frame_index / 8U] & (1U << (frame_index % 8U));
+    return pmm_bitmap[frame_index / 32U] & (1U << (frame_index % 32U));
 }
 
 static void bit_set(unsigned int frame_index)
 {
-    pmm_bitmap[frame_index / 8U] |= (1U << (frame_index % 8U));
+    pmm_bitmap[frame_index / 32U] |= (1U << (frame_index % 32U));
 }
 
 static void bit_clear(unsigned int frame_index)
 {
-    pmm_bitmap[frame_index / 8U] &= ~(1U << (frame_index % 8U));
+    pmm_bitmap[frame_index / 32U] &= ~(1U << (frame_index % 32U));
 }
 
 static void mark_frame_used(unsigned int frame_index)
@@ -233,7 +234,7 @@ void pmm_init(multiboot_info_t *mbinfo)
     unsigned int highest_physical_address = 0;
     unsigned int kernel_start = (unsigned int)kernel_physical_start;
     unsigned int kernel_end = (unsigned int)kernel_physical_end;
-    unsigned int mbinfo_physical = (unsigned int)mbinfo - VIRTUAL_KERNEL_BASE;
+    unsigned int mbinfo_physical = V_TO_P(mbinfo);
     unsigned int i;
 
     pmm_bitmap = 0;
@@ -246,7 +247,7 @@ void pmm_init(multiboot_info_t *mbinfo)
         return;
     }
 
-    mmap_current = mbinfo->mmap_addr + VIRTUAL_KERNEL_BASE;
+    mmap_current = P_TO_V(mbinfo->mmap_addr);
     mmap_end = mmap_current + mbinfo->mmap_length;
 
     while (mmap_current < mmap_end) {
@@ -261,8 +262,11 @@ void pmm_init(multiboot_info_t *mbinfo)
     }
 
     pmm_total_frame_count = align_up(highest_physical_address) / PMM_FRAME_SIZE;
-    pmm_bitmap_size = (pmm_total_frame_count + 7U) / 8U;
-    pmm_bitmap_physical_start = find_bitmap_region(mbinfo, pmm_bitmap_size);
+
+    pmm_bitmap_size = (pmm_total_frame_count + 31U) / 32U;
+    
+    unsigned int bitmap_size_bytes = pmm_bitmap_size * sizeof(unsigned int);
+    pmm_bitmap_physical_start = find_bitmap_region(mbinfo, bitmap_size_bytes);
 
     if (pmm_total_frame_count == 0U || pmm_bitmap_physical_start == 0U) {
         pmm_total_frame_count = 0;
@@ -270,15 +274,16 @@ void pmm_init(multiboot_info_t *mbinfo)
         return;
     }
 
-    pmm_bitmap = (unsigned char *)(pmm_bitmap_physical_start + VIRTUAL_KERNEL_BASE);
+    pmm_bitmap = (unsigned int *)(P_TO_V(pmm_bitmap_physical_start));
+
 
     for (i = 0; i < pmm_bitmap_size; i++) {
-        pmm_bitmap[i] = 0xFF;
+        pmm_bitmap[i] = 0xFFFFFFFFU;
     }
 
     pmm_used_frame_count = pmm_total_frame_count;
 
-    mmap_current = mbinfo->mmap_addr + VIRTUAL_KERNEL_BASE;
+    mmap_current = P_TO_V(mbinfo->mmap_addr);
     while (mmap_current < mmap_end) {
         multiboot_memory_map_t *entry = (multiboot_memory_map_t *)mmap_current;
 
@@ -296,19 +301,15 @@ void pmm_init(multiboot_info_t *mbinfo)
 
     /* Keep the low memory area reserved for BIOS, GRUB and MMIO. */
     reserve_region(0x00000000U, PMM_LOW_MEMORY_LIMIT);
-
-    /* Keep the multiboot information buffers reserved. */
     reserve_region(mbinfo_physical, sizeof(multiboot_info_t));
     reserve_region(mbinfo->mmap_addr, mbinfo->mmap_length);
-
-    /* Keep the kernel image and its .bss allocations reserved. */
     reserve_region(kernel_start, kernel_end - kernel_start);
-
+    
     /* Keep the bitmap storage itself reserved. */
-    reserve_region(pmm_bitmap_physical_start, pmm_bitmap_size);
+    reserve_region(pmm_bitmap_physical_start, pmm_bitmap_size * sizeof(unsigned int));
 
     if (mbinfo->flags & MULTIBOOT_INFO_MODS) {
-        multiboot_module_t *modules = (multiboot_module_t *)(mbinfo->mods_addr + VIRTUAL_KERNEL_BASE);
+        multiboot_module_t *modules = (multiboot_module_t *)(P_TO_V(mbinfo->mods_addr));
         unsigned int module_count = mbinfo->mods_count;
 
         reserve_region(mbinfo->mods_addr, module_count * sizeof(multiboot_module_t));
@@ -318,7 +319,6 @@ void pmm_init(multiboot_info_t *mbinfo)
         }
     }
 
-    /* Reserve the temporary mapping slot used to access arbitrary page frames. */
     boot_page_table1[1023] = 0;
     invalidate_tlb(PMM_TEMP_PAGE_VADDR);
 }
@@ -327,6 +327,7 @@ unsigned int pmm_alloc_frame(void)
 {
     unsigned int frame_index;
 
+    
     for (frame_index = 0; frame_index < pmm_total_frame_count; frame_index++) {
         if (!bit_test(frame_index)) {
             mark_frame_used(frame_index);

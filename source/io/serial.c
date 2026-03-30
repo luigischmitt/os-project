@@ -1,7 +1,6 @@
-#include "io.h"
+#include "io/io.h"
+#include "io/serial.h"
 
-#include "serial.h"
-#include "io.h"
 
 /* COM1 base */
 #define SERIAL_COM1_BASE 0x3F8

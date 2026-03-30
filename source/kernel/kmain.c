@@ -1,13 +1,13 @@
-#include "io.h"
-#include "framebuffer.h"
-#include "serial.h"
-#include "gdt.h"
-#include "pic.h"
-#include "idt.h"
+#include "io/io.h"
+#include "io/framebuffer.h"
+#include "io/serial.h"
+#include "segmentation/gdt.h"
+#include "interrupt/pic.h"
+#include "interrupt/idt.h"
 #include "multiboot.h"
-#include "pmm.h"
-#include "vmm.h"
-#include "kheap.h" /* Included the Kernel Heap */
+#include "paging/pmm.h"
+#include "paging/vmm.h"
+#include "paging/kheap.h"
 
 #define VIRTUAL_KERNEL_BASE 0xC0000000
 #define P_TO_V(p)  ((unsigned int)(p) + VIRTUAL_KERNEL_BASE)

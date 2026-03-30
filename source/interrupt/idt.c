@@ -1,9 +1,9 @@
-#include "idt.h"
-#include "io.h"
-#include "pic.h"
-#include "serial.h"
-#include "framebuffer.h"
-#include "keyboard.h"
+#include "interrupt/idt.h"
+#include "io/io.h"
+#include "interrupt/pic.h"
+#include "io/serial.h"
+#include "io/framebuffer.h"
+#include "interrupt/keyboard.h"
 
 struct idt_entry idt[256]; // IDT table
 struct idt_ptr idtp; // Pointer to the table

@@ -1,5 +1,5 @@
-#include "vmm.h"
-#include "pmm.h"
+#include "paging/vmm.h"
+#include "paging/pmm.h"
 
 /* Import the original Page Directory and Table created in loader.s */
 extern unsigned int boot_page_directory[1024];

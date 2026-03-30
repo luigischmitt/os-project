@@ -1,5 +1,5 @@
-#include "io.h"
-#include "framebuffer.h"
+#include "io/io.h"
+#include "io/framebuffer.h"
 
 #define FB_GREEN 2
 #define FB_BLACK 0

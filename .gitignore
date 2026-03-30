@@ -1,9 +1,6 @@
 bochslog.txt
-bochslog.txt
-bochslog.txt
 iso/boot/kernel.elf
-kernel.elf
-os.iso
+iso/modules/program
+out/*
 *.o
 *.out
-iso/modules/program

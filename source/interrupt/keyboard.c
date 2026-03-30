@@ -1,5 +1,5 @@
-#include "keyboard.h"
-#include "io.h"
+#include "interrupt/keyboard.h"
+#include "io/io.h"
 
 /* Keyboard mapping */
 unsigned char keyboard_map[128] = {

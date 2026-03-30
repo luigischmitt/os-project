@@ -1,6 +1,6 @@
-#include "kheap.h"
-#include "pmm.h"
-#include "vmm.h"
+#include "paging/kheap.h"
+#include "paging/pmm.h"
+#include "paging/vmm.h"
 
 /* Virtual Address where our Heap will start (Arbitrary kernel space address) */
 #define KHEAP_START 0xD0000000

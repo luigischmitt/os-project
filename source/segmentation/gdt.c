@@ -1,5 +1,5 @@
-#include "gdt.h"
-#include "serial.h"
+#include "segmentation/gdt.h"
+#include "io/serial.h"
 
 struct gdt_entry gdt[3];
 struct gdt_ptr gp;

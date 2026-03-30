@@ -1,18 +1,34 @@
-OBJECTS = loader.o kmain.o io.o framebuffer.o serial.o gdt.o gdt_flush.o interrupt_handler.o idt.o pic.o keyboard.o pmm.o vmm.o kheap.o
+#Searching for the loader
+LOADER_SRC = source/boot/loader.s
+LOADER_OBJ = $(LOADER_SRC:.s=.o)
+
+# 2. searching for .c and .s files, ignoring the loader.s
+C_SOURCES = $(wildcard source/*/*.c)
+S_SOURCES = $(filter-out $(LOADER_SRC), $(wildcard source/*/*.s))
+
+# 3. Objects list
+OBJECTS = $(LOADER_OBJ) $(C_SOURCES:.c=.o) $(S_SOURCES:.s=.o)
+
 CC = gcc
+# Iinclude sets the include file as our main file for includes
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -c
-LDFLAGS = -T link.ld -melf_i386
+    -nostartfiles -nodefaultlibs -Wall -Wextra -c -Iinclude
+
+# Linker
+LDFLAGS = -T linker/link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
 
-all: kernel.elf
+# Kernel location
+KERNEL_BIN = iso/boot/kernel.elf
 
-kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+all: $(KERNEL_BIN)
 
-os.iso: kernel.elf iso/modules/program
-	cp kernel.elf iso/boot/kernel.elf
+$(KERNEL_BIN): $(OBJECTS)
+	ld $(LDFLAGS) $(OBJECTS) -o $@
+
+os.iso: $(KERNEL_BIN) iso/modules/program
+	@mkdir -p out
 	genisoimage -R                              \
 		-b boot/grub/stage2_eltorito    \
 		-no-emul-boot                   \
@@ -21,20 +37,22 @@ os.iso: kernel.elf iso/modules/program
 		-input-charset utf8             \
 		-quiet                          \
 		-boot-info-table                \
-		-o os.iso                       \
+		-o out/os.iso                       \
 		iso
 
 iso/modules/program: iso/modules/program.s
 	nasm -f bin $< -o $@
 
 run: os.iso
-	bochs -f bochsrc.txt -q
+# Bochs config
+	bochs -f bconfig/bochsrc.txt -q
 
+# Generic rules to compile .c and .s to .o
 %.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf os.iso *.out bochslog.txt iso/modules/program iso/boot/kernel.elf
+	rm -rf $(OBJECTS) *.out out/* iso/modules/program $(KERNEL_BIN)

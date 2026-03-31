@@ -16,7 +16,7 @@ typedef struct iNode{
     uint32_t inode_number;
     tNodeType type;
     uint32_t size;        // Size in bytes
-    uint32_t link_count;  // How many names point to here
+    uint8_t used; // In use -> 1; Not in use -> 0
     
     // We could have direct/indirect pointers to blocks here.
     // But we're in RAM, so we just need a single pointer.
@@ -42,9 +42,5 @@ tINode* ramfs_get_inode(uint32_t inode_number);
 
 // Adds a Dentry (name -> Inode number) to a Inode that is a directory
 int ramfs_add_dentry(uint32_t dir_inode, const char* name, uint32_t target_inode);
-
-// Reads and writes raw data in the FILE Inode void* pointer
-int ramfs_write_data(uint32_t inode_number, const char* data, uint32_t size);
-int ramfs_read_data(uint32_t inode_number, char* buffer, uint32_t size);
 
 #endif // RAMFS_H

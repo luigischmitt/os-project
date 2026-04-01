@@ -4,6 +4,7 @@
 #include "io/serial.h"
 #include "io/framebuffer.h"
 #include "interrupt/keyboard.h"
+#include "shell/shell.h"
 
 struct idt_entry idt[256]; // IDT table
 struct idt_ptr idtp; // Pointer to the table
@@ -34,19 +35,20 @@ void idt_init() { // Function that initialize the IDT table
 }
 
 
-void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack) { // Function to handle interrupts
+/*
+ * Handles hardware/CPU interrupts routed by the IDT.
+ * cpu contains the saved general-purpose register snapshot.
+ * interrupt is the interrupt vector number.
+ * stack contains values pushed by the CPU on interrupt entry.
+ */
+void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack) {
+    (void)cpu;
+    (void)stack;
+
     if (interrupt == 33) {
         unsigned char letter = read_letter();
-
-        if(letter == '\b'){ // Backspace
-            fb_decrement_cursor_pos();
-            fb_write(" ");
-            fb_decrement_cursor_pos();
-        } else if(letter != '\0'){ // This if is necessary to avoid the printing of \0 in the framebuffer
-            char str[2] = {letter, '\0'};
-
-            fb_write(str); // Prints the character on the framebuffer
-        }
+        /* Routes keyboard input to the shell line editor/parser. */
+        shell_handle_key((char)letter);
     }
 
     pic_acknowledge(interrupt); // Function to notify the hardware that the interrupt is handled

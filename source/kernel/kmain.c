@@ -4,6 +4,7 @@
 #include "segmentation/gdt.h"
 #include "interrupt/pic.h"
 #include "interrupt/idt.h"
+#include "shell/shell.h"
 #include "multiboot.h"
 #include "paging/pmm.h"
 #include "paging/vmm.h"
@@ -20,6 +21,10 @@ static void halt_forever(void)
     }
 }
 
+/*
+ * Keeps the CPU in a low-power wait loop with interrupts enabled.
+ * Hardware IRQs wake the CPU and execution returns to this loop after handling.
+ */
 static void idle_forever(void)
 {
     for (;;) {
@@ -39,6 +44,11 @@ static void uint_to_hex_str(unsigned int val, char *buffer) {
     buffer[10] = '\0';
 }
 
+/*
+ * Main kernel entry point.
+ *
+ * ebx contains the Multiboot information pointer passed by the bootloader.
+ */
 void kmain(unsigned int ebx) {
 
     multiboot_info_t *mbinfo = (multiboot_info_t *) (P_TO_V(ebx));
@@ -57,6 +67,7 @@ void kmain(unsigned int ebx) {
     gdt_init();    /* Initialize GDT */
     pic_remap();   /* Remap PIC */
     idt_init();    /* Initialize IDT */
+    /* Enables maskable interrupts so hardware IRQs can be delivered. */
     __asm__("sti");
 
     serial_write("Kernel entered the higher half.\n");
@@ -154,6 +165,11 @@ void kmain(unsigned int ebx) {
     kfree(ptr1);
     kfree(ptr2);
     serial_write("Heap memory freed.\n");
+
+    /* Clears startup output before entering interactive shell mode. */
+    fb_clear_screen();
+    /* Initializes shell state and prints the first prompt. */
+    shell_init();
 
     /* Enters idle mode with interrupts enabled for interactive IRQ handling. */
     idle_forever();

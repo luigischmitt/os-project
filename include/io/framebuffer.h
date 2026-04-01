@@ -9,6 +9,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 
 void scroll();
 
+/* Clears the entire text screen and resets the cursor to the first cell. */
 void fb_clear_screen();
 
 int fb_write(const char *buf);

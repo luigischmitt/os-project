@@ -33,10 +33,10 @@ void fb_move_cursor(unsigned short pos)
  *  Writes a character with the given foreground and background to position i
  *  in the framebuffer.
  *
- *  @param i  The location in the framebuffer that will be written
- *  @param c  The character that will be written
- *  @param fg The foreground color
- *  @param bg The background color
+ * @param i Linear cell index in the framebuffer.
+ * @param c Character to be written.
+ * @param fg Foreground color (low 4 bits).
+ * @param bg Background color (low 4 bits).
  */
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 {
@@ -45,9 +45,8 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
     fb[offset + 1] = ((bg & 0x0F) << 4) | (fg & 0x0F); // 2° turn. In this section, we define the foreground color and the background color
 }
 
-
-/** scroll:
- *  scrolls the framebuffer
+/**
+ * Scrolls the framebuffer up by one row and keeps the cursor on the last row.
  */
 void scroll()
 {
@@ -56,18 +55,21 @@ void scroll()
     // Moves all rows up by 1 line
     for (i = 0; i < (FB_HEIGHT - 1) * FB_WIDTH; i++)
     {
-        fb_write_cell(i, fb[2 * (i + FB_WIDTH)], 2, 0);
+        fb_write_cell(i, fb[2 * (i + FB_WIDTH)], FB_GREEN, FB_BLACK);
     }
 
     // Clears the last line on the frame buffer
     for (i = (FB_HEIGHT - 1) * FB_WIDTH; i < FB_HEIGHT * FB_WIDTH; i++)
     {
-        fb_write_cell(i, ' ', 2, 0);
+        fb_write_cell(i, ' ', FB_GREEN, FB_BLACK);
     }
 
-    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH; // Updates the cursor to the last line
+    cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH;
 }
 
+/**
+ * Clears the full text framebuffer and places the cursor at the top-left cell.
+ */
 void fb_clear_screen()
 {
     unsigned int i;
@@ -81,11 +83,11 @@ void fb_clear_screen()
     fb_move_cursor(cursor_pos);
 }
 
-
-/** write:
- *  Writes a null-terminated string into the framebuffer
+/**
+ * Counts the number of visible characters in a null-terminated string.
  *
- *  @param buf a pointer that points toward a string that will be written on the framebuffer
+ * @param buf Pointer to a null-terminated string.
+ * @return Length of the string, excluding the null terminator.
  */
 static unsigned int fb_strlen(const char *buf)
 {
@@ -104,26 +106,33 @@ static unsigned int fb_strlen(const char *buf)
     return len;
 }
 
+/**
+ * Writes a null-terminated string to the framebuffer using the current cursor position.
+ * Newline characters move the cursor to the next row and scrolling is applied as needed.
+ *
+ * @param buf Pointer to the text that will be printed.
+ * @return Number of characters processed from buf.
+ */
 int fb_write(const char *buf)
 {
     unsigned int i;
     unsigned int len = fb_strlen(buf);
 
-    for (i = 0; i < len; i++) // travel around the string
+    for (i = 0; i < len; i++)
     {
-        char c = buf[i]; 
+        char c = buf[i];
 
         if (c == '\n')
         {
-            cursor_pos += FB_WIDTH - (cursor_pos % FB_WIDTH); //Move the cursor to the next line
+            cursor_pos += FB_WIDTH - (cursor_pos % FB_WIDTH);
         }
         else
         {
-            fb_write_cell(cursor_pos, c, FB_GREEN, FB_BLACK); // Writes the current character
-            cursor_pos++; // Increments the position
+            fb_write_cell(cursor_pos, c, FB_GREEN, FB_BLACK);
+            cursor_pos++;
         }
 
-        if (cursor_pos >= FB_WIDTH * FB_HEIGHT) // Verifies if the framebuffer is full
+        if (cursor_pos >= FB_WIDTH * FB_HEIGHT)
         {
             scroll(); // If it's full, then scrolls the framebuffer
         }
@@ -134,9 +143,14 @@ int fb_write(const char *buf)
     return (int)len;
 }
 
-void fb_decrement_cursor_pos() {
-    if(cursor_pos <= 0) {
-        return; // Operação inválida, pois o cursor já está no 0
+/**
+ * Moves the cursor one cell to the left when possible.
+ */
+void fb_decrement_cursor_pos()
+{
+    if (cursor_pos == 0)
+    {
+        return; // Invalid operation, because the cursor is already at 0
     }
 
     cursor_pos--;

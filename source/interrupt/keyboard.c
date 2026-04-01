@@ -1,6 +1,7 @@
 #include "interrupt/keyboard.h"
 #include "io/io.h"
 
+/* Number of entries available in the scan-code translation table. */
 #define KEYBOARD_MAP_SIZE 128U
 
 /* Keyboard mapping */
@@ -22,7 +23,12 @@ static const unsigned char keyboard_map[KEYBOARD_MAP_SIZE] = {
     /* The rest will be initialized with 0 */
 };
 
-unsigned char read_letter(void) // Function responsible for reading a letter from the keyboard
+/**
+ * Converts the latest keyboard scan code into an ASCII character.
+ *
+ * Returns '\0' for key-release events, unmapped keys, or invalid scan codes.
+ */
+unsigned char read_letter(void)
 {
   unsigned char scan_code = read_scan_code();
 
@@ -37,7 +43,10 @@ unsigned char read_letter(void) // Function responsible for reading a letter fro
   return keyboard_map[scan_code];
 }
 
-unsigned char read_scan_code(void) // Function responsible for reading a scan code from the keyboard
+/**
+ * Reads one raw scan code byte from the PS/2 keyboard data port.
+ */
+unsigned char read_scan_code(void)
 {
   return inb(KBD_DATA_PORT);
 }

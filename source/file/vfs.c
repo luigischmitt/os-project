@@ -2,48 +2,42 @@
 #include "file/ramfs.h"
 #include "paging/kheap.h"
 #include "io/serial.h"
+#include "io/utils.h"
 
-// Dependências do Kernel
-extern void* kmalloc(uint32_t size);
-extern void kfree(void* ptr);
+// Global variables
+VFSNode* root_vnode = NULL; // Virtual node root
+VFSNode* current_vnode = NULL; // current node
 
-// Variáveis Globais de Estado
-VFSNode* root_vnode = NULL;
-VFSNode* current_vnode = NULL;
-
-// Utilitários
-static int string_compare(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) { s1++; s2++; }
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
-
+// Initialization of virtual file system
 void vfs_init(void) {
-    ramfs_init();
+    ramfs_init(); // Initialization of the inode table
 
-    root_vnode = (VFSNode*)kmalloc(sizeof(VFSNode));
+    root_vnode = (VFSNode*)kmalloc(sizeof(VFSNode)); // allocation of the root node
+    if(!root_vnode) return -1;
     string_copy(root_vnode->name, "/");
     root_vnode->parent = NULL;
     root_vnode->first_child = NULL;
     root_vnode->next_sibling = NULL;
 
-    // Cria o Inode físico raiz
+    // Creates the inode for the root
     root_vnode->inode_number = ramfs_allocate_inode(DIRECTORY);
 
-    current_vnode = root_vnode;
+    current_vnode = root_vnode; // Updates the current node
 }
 
+// Creating a virtual file system node
 int vfs_create(const char* name, int is_directory) {
-    // 1. Verifica duplicidade
+    // Checks for duplicity
     VFSNode* temp = current_vnode->first_child;
     while (temp != NULL) {
         if (string_compare(temp->name, name) == 0) {
-            serial_write("Erro: Ja existe com esse nome.\n");
+            serial_write("Erro: Ja existe um arquivo com esse nome.\n");
             return -1;
         }
         temp = temp->next_sibling;
     }
 
-    // 2. Aloca Inode físico
+    // Allocating inode for the vfsnode
     tNodeType type = is_directory ? DIRECTORY : FILE;
     uint32_t new_inode = ramfs_allocate_inode(type);
     if (new_inode == (uint32_t)-1) {
@@ -51,17 +45,19 @@ int vfs_create(const char* name, int is_directory) {
         return -1;
     }
 
-    // 3. Aloca e configura o Nó do VFS
+    //Allocating and managing vfsnode
     VFSNode* new_node = (VFSNode*)kmalloc(sizeof(VFSNode));
+    if(!new_node) return -1;
+
     string_copy(new_node->name, name);
     new_node->inode_number = new_inode;
     new_node->parent = current_vnode;
     new_node->first_child = NULL;
     new_node->next_sibling = NULL;
 
-    // 4. Insere na árvore
+    // Inserting in the tree
     if (current_vnode->first_child == NULL) {
-        current_vnode->first_child = new_node;
+        current_vnode->first_child = new_node; // If it's the first child
     } else {
         temp = current_vnode->first_child;
         while (temp->next_sibling != NULL) {
@@ -73,6 +69,7 @@ int vfs_create(const char* name, int is_directory) {
     return 0;
 }
 
+// Function responsible for listing all the children of a directory
 int vfs_ls(const char* path) {
     (void)path;
     VFSNode* temp = current_vnode->first_child;
@@ -92,15 +89,16 @@ int vfs_ls(const char* path) {
     return 0;
 }
 
+// Function responsible for navigation between directories
 int vfs_cd(const char* path) {
-    if (string_compare(path, "..") == 0) {
+    if (string_compare(path, "..") == 0) { // Parent
         if (current_vnode->parent != NULL) {
             current_vnode = current_vnode->parent;
         }
         return 0;
     }
 
-    if (string_compare(path, "/") == 0) {
+    if (string_compare(path, "/") == 0) { // Root
         current_vnode = root_vnode;
         return 0;
     }
@@ -124,6 +122,7 @@ int vfs_cd(const char* path) {
     return -1;
 }
 
+// Function that deletes a file
 int vfs_rm(const char* path) {
     VFSNode* temp = current_vnode->first_child;
     VFSNode* prev = NULL;
@@ -136,7 +135,7 @@ int vfs_rm(const char* path) {
                 prev->next_sibling = temp->next_sibling;
             }
 
-            // Opcional: Criar e chamar um ramfs_free_inode(temp->inode_number);
+            ramfs_free_inode(temp->inode_number);
             kfree(temp); 
             return 0;
         }
@@ -148,6 +147,7 @@ int vfs_rm(const char* path) {
     return -1;
 }
 
+// Function that returns the current path
 void vfs_pwd(char* buffer, uint32_t max_len) {
     // Initial directory
     if (current_vnode == root_vnode) {
@@ -160,14 +160,14 @@ void vfs_pwd(char* buffer, uint32_t max_len) {
     VFSNode* path_nodes[16]; 
     int depth = 0;
 
-    // Sobe a árvore e empilha
+    // climbs the tree and starts stacking
     while (temp != root_vnode && depth < 16) {
         path_nodes[depth] = temp;
         temp = temp->parent;
         depth++;
     }
 
-    // Desempilha escrevendo no buffer
+    // unstacks writing on the buffer
     uint32_t buf_idx = 0;
     for (int i = depth - 1; i >= 0; i--) {
         if (buf_idx < max_len - 1) {
@@ -186,11 +186,12 @@ void vfs_pwd(char* buffer, uint32_t max_len) {
 // Read / Write functions
 // ==========================================
 
+// Function that starts the process of writing on a file
 int vfs_write(const char* path, const char* content) {
     VFSNode* temp = current_vnode->first_child;
     while (temp != NULL) {
         if (string_compare(temp->name, path) == 0) {
-            return ramfs_write_file(temp->inode_number, content);
+            return ramfs_write_file(temp->inode_number, content); // Goes to the function to write on a inode
         }
         temp = temp->next_sibling;
     }
@@ -198,11 +199,12 @@ int vfs_write(const char* path, const char* content) {
     return -1;
 }
 
+// Function that starts the process of reading a file
 char* vfs_read(const char* path) {
     VFSNode* temp = current_vnode->first_child;
     while (temp != NULL) {
         if (string_compare(temp->name, path) == 0) {
-            return ramfs_read_file(temp->inode_number);
+            return ramfs_read_file(temp->inode_number); // Goes to the function that reads an Inode
         }
         temp = temp->next_sibling;
     }

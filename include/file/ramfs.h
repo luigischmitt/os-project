@@ -36,6 +36,9 @@ void ramfs_init(void);
 // Creates a Inode in memory and returns its number
 uint32_t ramfs_allocate_inode(tNodeType type);
 
+// Free inode
+int ramfs_free_inode(uint32_t inode_number);
+
 // Returns a pointer to one specific Inode from a Inode number
 tINode* ramfs_get_inode(uint32_t inode_number);
 

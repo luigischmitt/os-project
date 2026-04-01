@@ -125,7 +125,7 @@ static int shell_verify_command(char* command, char* args){
     } else if(!string_compare(command, "rm")) {
         vfs_rm(args);
 
-        return;
+        return 0;
     }else if(!string_compare(command, "write")) {
         char filename[32];
         const char *content = "";

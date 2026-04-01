@@ -3,6 +3,7 @@
 #include "paging/kheap.h"
 #include "io/serial.h"
 #include "io/utils.h"
+#include "io/framebuffer.h"
 
 // Global variables
 VFSNode* root_vnode = NULL; // Virtual node root
@@ -128,6 +129,11 @@ int vfs_rm(const char* path) {
 
     while (temp != NULL) {
         if (string_compare(temp->name, path) == 0) {
+            if (temp->first_child != NULL) {
+                fb_write("Erro: Diretorio nao esta vazio. Apague os arquivos primeiro.\n");
+                return -1;
+            }
+
             if (prev == NULL) {
                 current_vnode->first_child = temp->next_sibling;
             } else {

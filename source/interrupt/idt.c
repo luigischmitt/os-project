@@ -40,12 +40,12 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 
         if(letter == '\b'){ // Backspace
             fb_decrement_cursor_pos();
-            fb_write(" ", 1);
+            fb_write(" ");
             fb_decrement_cursor_pos();
         } else if(letter != '\0'){ // This if is necessary to avoid the printing of \0 in the framebuffer
             char str[2] = {letter, '\0'};
 
-            fb_write(str, 1); // Prints the character on the framebuffer
+            fb_write(str); // Prints the character on the framebuffer
         }
     }
 

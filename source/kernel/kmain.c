@@ -51,12 +51,12 @@ void kmain(unsigned int ebx) {
     pic_remap();   /* Remap PIC */
     idt_init();    /* Initialize IDT */
 
-    fb_write("Kernel entered the higher half.\n", 32);
+    fb_write("Kernel entered the higher half.\n");
     serial_write("Kernel entered the higher half.\n");
 
     /* Check Multiboot flags before following ebx pointer */
     if (!(mbinfo->flags & MULTIBOOT_INFO_MEM_MAP)) {
-        fb_write("Error: No multiboot memory map.\n", 32);
+        fb_write("Error: No multiboot memory map.\n");
         serial_write("Error: No multiboot memory map.\n");
         halt_forever();
     }
@@ -139,7 +139,7 @@ void kmain(unsigned int ebx) {
         ptr2[0] = 'W';
 
         serial_write("Heap read/write test successful!\n");
-        fb_write("All memory tests passed!\n", 25);
+        fb_write("All memory tests passed!\n");
     } else {
         serial_write("Error: kmalloc returned null.\n");
     }

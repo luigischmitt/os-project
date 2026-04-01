@@ -10,7 +10,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 void scroll();
 
 
-int fb_write(char *buf, unsigned int len);
+int fb_write(const char *buf);
 
 void fb_decrement_cursor_pos();
 

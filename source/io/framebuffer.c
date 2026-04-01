@@ -70,14 +70,31 @@ void scroll()
 
 
 /** write:
- *  Writes a string with length len into the framebuffer
+ *  Writes a null-terminated string into the framebuffer
  *
  *  @param buf a pointer that points toward a string that will be written on the framebuffer
- *  @param len the length of the string
  */
-int fb_write(char *buf, unsigned int len)
+static unsigned int fb_strlen(const char *buf)
+{
+    unsigned int len = 0U;
+
+    if (buf == 0)
+    {
+        return 0U;
+    }
+
+    while (buf[len] != '\0')
+    {
+        len++;
+    }
+
+    return len;
+}
+
+int fb_write(const char *buf)
 {
     unsigned int i;
+    unsigned int len = fb_strlen(buf);
 
     for (i = 0; i < len; i++) // travel around the string
     {
@@ -101,7 +118,7 @@ int fb_write(char *buf, unsigned int len)
 
     fb_move_cursor(cursor_pos); // Updates the frame buffer cursor
 
-    return len;
+    return (int)len;
 }
 
 void fb_decrement_cursor_pos() {

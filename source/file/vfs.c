@@ -65,7 +65,6 @@ int vfs_create(const char* name, int is_directory) {
         }
         temp->next_sibling = new_node;
     }
-
     return 0;
 }
 
@@ -147,7 +146,7 @@ int vfs_rm(const char* path) {
     return -1;
 }
 
-// Function that returns the current path
+// Function that changes the buffer argument with the pwd
 void vfs_pwd(char* buffer, uint32_t max_len) {
     // Initial directory
     if (current_vnode == root_vnode) {

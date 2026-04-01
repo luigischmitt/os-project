@@ -1,5 +1,7 @@
 #include "shell/shell.h"
 #include "io/framebuffer.h"
+#include "io/utils.h"
+#include "file/vfs.h"
 
 #define SHELL_INPUT_MAX 128U
 #define SHELL_PROMPT "> "
@@ -50,7 +52,14 @@ static void shell_parse_command(const char *line, char *command, unsigned int co
 
 /* Writes the shell prompt to the framebuffer. */
 static void shell_print_prompt(void)
-{
+{   
+    // Temp path buffer
+    char path_buffer[256]; 
+    
+    // Calls the vsf pwd function to fill the buffer with the path
+    vfs_pwd(path_buffer, 256);
+    
+    fb_write(path_buffer);
     fb_write(SHELL_PROMPT);
 }
 
@@ -77,6 +86,99 @@ static void shell_erase_last_char(void)
     fb_decrement_cursor_pos();
 }
 
+static int shell_verify_command(char* command, char* args){
+    if (command[0] == '\0')
+    {
+        return 0;
+    } else if(!string_compare(command, "clear")) {
+        fb_clear_screen();
+        return 0;
+    } else if(!string_compare(command, "pwd")){
+        // Temp path buffer
+        char path_buffer[256]; 
+        
+        // Calls the vsf pwd function to fill the buffer with the path
+        vfs_pwd(path_buffer, 256);
+        
+        // Prints the pwd
+        fb_write("PWD: ");
+        fb_write(path_buffer);
+        fb_write("\n");
+        
+        return 0;
+    } else if(!string_compare(command, "touch")) {
+        vfs_create(args, 0);
+
+        return 0;
+    } else if(!string_compare(command, "mkdir")) {
+        vfs_create(args, 1);
+
+        return 0;
+    } else if(!string_compare(command, "cd")) {
+        vfs_cd(args);
+
+        return 0;
+    } else if(!string_compare(command, "ls")) {
+        vfs_ls(args);
+
+        return 0;
+    } else if(!string_compare(command, "rm")) {
+        vfs_rm(args);
+
+        return;
+    }else if(!string_compare(command, "write")) {
+        char filename[32];
+        const char *content = "";
+        unsigned int i = 0;
+
+        // File name
+        while (args[i] != '\0' && args[i] != ' ' && i < 31) {
+            filename[i] = args[i];
+            i++;
+        }
+        filename[i] = '\0';
+
+        // Content start
+        if (args[i] != '\0') {
+            content = shell_skip_spaces(&args[i]);
+        }
+
+        // Verifies if the user sended the 2 arguments
+        if (filename[0] == '\0' || content[0] == '\0') {
+            fb_write("Uso: write <arquivo> <texto>\n");
+            return 0;
+        }
+
+        // Calls the vfs function to write
+        if (vfs_write(filename, content) != 0) {
+            fb_write("Erro ao gravar arquivo.\n");
+        };
+
+        return 0;
+    } else if(!string_compare(command, "read")) {
+        // File name
+        if (args[0] == '\0') {
+            fb_write("Uso: read <arquivo>\n");
+            return 0;
+        }
+
+        // Calls the vfs function to read
+        char* file_content = vfs_read(args);
+        
+        if (file_content != NULL) {
+            // Prints the content
+            fb_write(file_content);
+            fb_write("\n");
+        } else {
+            fb_write("Erro: Arquivo vazio ou nao encontrado.\n");
+        }
+
+        return 0;
+    }
+
+    return 1;
+}
+
 /*
  * Executes one parsed input line.
  * line is the full command line text entered by the user.
@@ -88,10 +190,7 @@ static void shell_execute_line(const char *line)
 
     shell_parse_command(line, command, sizeof(command), &args);
 
-    if (command[0] == '\0')
-    {
-        return;
-    }
+    if(!shell_verify_command(command, args)) return;
 
     fb_write("Comando nao encontrado: ");
     fb_write(command);

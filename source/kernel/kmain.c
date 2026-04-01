@@ -9,6 +9,7 @@
 #include "paging/pmm.h"
 #include "paging/vmm.h"
 #include "paging/kheap.h"
+#include "file/vfs.h"
 
 #define VIRTUAL_KERNEL_BASE 0xC0000000
 #define P_TO_V(p)  ((unsigned int)(p) + VIRTUAL_KERNEL_BASE)
@@ -168,6 +169,10 @@ void kmain(unsigned int ebx) {
 
     /* Clears startup output before entering interactive shell mode. */
     fb_clear_screen();
+
+    // Initializes the virtual file system
+    vfs_init();
+
     /* Initializes shell state and prints the first prompt. */
     shell_init();
 

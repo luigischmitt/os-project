@@ -20,6 +20,13 @@ static void halt_forever(void)
     }
 }
 
+static void idle_forever(void)
+{
+    for (;;) {
+        __asm__("sti; hlt");
+    }
+}
+
 /* Helper function to convert an integer address to a hex string for printing */
 static void uint_to_hex_str(unsigned int val, char *buffer) {
     const char *hex_chars = "0123456789ABCDEF";
@@ -50,13 +57,12 @@ void kmain(unsigned int ebx) {
     gdt_init();    /* Initialize GDT */
     pic_remap();   /* Remap PIC */
     idt_init();    /* Initialize IDT */
+    __asm__("sti");
 
-    fb_write("Kernel entered the higher half.\n");
     serial_write("Kernel entered the higher half.\n");
 
     /* Check Multiboot flags before following ebx pointer */
     if (!(mbinfo->flags & MULTIBOOT_INFO_MEM_MAP)) {
-        fb_write("Error: No multiboot memory map.\n");
         serial_write("Error: No multiboot memory map.\n");
         halt_forever();
     }
@@ -139,7 +145,7 @@ void kmain(unsigned int ebx) {
         ptr2[0] = 'W';
 
         serial_write("Heap read/write test successful!\n");
-        fb_write("All memory tests passed!\n");
+        serial_write("All memory tests passed!\n");
     } else {
         serial_write("Error: kmalloc returned null.\n");
     }
@@ -149,5 +155,6 @@ void kmain(unsigned int ebx) {
     kfree(ptr2);
     serial_write("Heap memory freed.\n");
 
-    halt_forever();
+    /* Enters idle mode with interrupts enabled for interactive IRQ handling. */
+    idle_forever();
 }

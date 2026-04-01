@@ -1,8 +1,10 @@
 #include "interrupt/keyboard.h"
 #include "io/io.h"
 
+#define KEYBOARD_MAP_SIZE 128U
+
 /* Keyboard mapping */
-unsigned char keyboard_map[128] = {
+static const unsigned char keyboard_map[KEYBOARD_MAP_SIZE] = {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', 
   '9', '0', '-', '=', '\b', 
   '\t',                     
@@ -22,7 +24,17 @@ unsigned char keyboard_map[128] = {
 
 unsigned char read_letter(void) // Function responsible for reading a letter from the keyboard
 {
-  return keyboard_map[read_scan_code()];
+  unsigned char scan_code = read_scan_code();
+
+  if ((scan_code & 0x80U) != 0U) {
+    return '\0';
+  }
+
+  if (scan_code >= KEYBOARD_MAP_SIZE) {
+    return '\0';
+  }
+
+  return keyboard_map[scan_code];
 }
 
 unsigned char read_scan_code(void) // Function responsible for reading a scan code from the keyboard

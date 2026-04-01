@@ -68,6 +68,19 @@ void scroll()
     cursor_pos = (FB_HEIGHT - 1) * FB_WIDTH; // Updates the cursor to the last line
 }
 
+void fb_clear_screen()
+{
+    unsigned int i;
+
+    for (i = 0; i < FB_WIDTH * FB_HEIGHT; i++)
+    {
+        fb_write_cell(i, ' ', FB_GREEN, FB_BLACK);
+    }
+
+    cursor_pos = 0;
+    fb_move_cursor(cursor_pos);
+}
+
 
 /** write:
  *  Writes a null-terminated string into the framebuffer

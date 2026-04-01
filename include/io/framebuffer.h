@@ -9,6 +9,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 
 void scroll();
 
+void fb_clear_screen();
 
 int fb_write(const char *buf);
 

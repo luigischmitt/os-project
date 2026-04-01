@@ -167,6 +167,9 @@ void kmain(unsigned int ebx) {
     kfree(ptr2);
     serial_write("Heap memory freed.\n");
 
+    serial_write("=========================\n");
+    serial_write("\n\n\n");
+
     /* Clears startup output before entering interactive shell mode. */
     fb_clear_screen();
 

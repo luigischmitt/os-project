@@ -32,7 +32,7 @@ int vfs_create(const char* name, int is_directory) {
     VFSNode* temp = current_vnode->first_child;
     while (temp != NULL) {
         if (string_compare(temp->name, name) == 0) {
-            serial_write("Erro: Ja existe um arquivo com esse nome.\n");
+            fb_write("Erro: Ja existe um arquivo com esse nome.\n");
             return -1;
         }
         temp = temp->next_sibling;
@@ -42,7 +42,7 @@ int vfs_create(const char* name, int is_directory) {
     tNodeType type = is_directory ? DIRECTORY : FILE;
     uint32_t new_inode = ramfs_allocate_inode(type);
     if (new_inode == (uint32_t)-1) {
-        serial_write("Erro: Tabela de Inodes cheia.\n");
+        fb_write("Erro: Tabela de Inodes cheia.\n");
         return -1;
     }
 
@@ -75,17 +75,17 @@ int vfs_ls(const char* path) {
     VFSNode* temp = current_vnode->first_child;
     
     while (temp != NULL) {
-        serial_write(temp->name);
+        fb_write(temp->name);
         
         tINode* inode = ramfs_get_inode(temp->inode_number);
         if (inode && inode->type == DIRECTORY) {
-            serial_write("/  "); 
+            fb_write("/  "); 
         } else {
-            serial_write("   ");
+            fb_write("   ");
         }
         temp = temp->next_sibling;
     }
-    serial_write("\n");
+    fb_write("\n");
     return 0;
 }
 
@@ -111,14 +111,14 @@ int vfs_cd(const char* path) {
                 current_vnode = temp;
                 return 0;
             } else {
-                serial_write("Erro: Nao e diretorio.\n");
+                fb_write("Erro: Nao e diretorio.\n");
                 return -1;
             }
         }
         temp = temp->next_sibling;
     }
 
-    serial_write("Diretorio nao encontrado.\n");
+    fb_write("Diretorio nao encontrado.\n");
     return -1;
 }
 
@@ -148,7 +148,7 @@ int vfs_rm(const char* path) {
         temp = temp->next_sibling;
     }
     
-    serial_write("Nao encontrado.\n");
+    fb_write("Nao encontrado.\n");
     return -1;
 }
 

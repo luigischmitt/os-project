@@ -38,16 +38,16 @@ include             Diretório que contém os headers do projeto
 source              Diretório que mantém o código c/assembly do projeto
 linker              Diretório que possui o link.ld
 
-source/boot         Contém o código responsável por realizar a inicialização do SO
+source/boot         Contém o código responsável por realizar a inicialização do kernel
 source/io           Possui o código responsável pelo framebuffer e pelo serial port
 source/kernel       Mantém o kmain.c, o código principal do kernel
 source/segmentation Contém o código responsável por segmentar a memória ram
-source/interrupt    Contém o código que lida com interrupts do sistema operacional
+source/interrupt    Contém o código que lida com interrupts do kernel
 source/paging       Contém o código que é responsável por realizar a paginação dentro do C
 source/file         Contém o código que inicializa o sistema virtual de arquivos
 source/shell        Contém o código que inicializa o mini-shell que é utilizado para demonstar o sistema virtual de arquivos
 
-Makefile            Compila e roda os códigos do SO
+Makefile            Compila e roda os códigos do kernel
 ```
 
 ## Constribuições individuais:

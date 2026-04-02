@@ -2,6 +2,7 @@
 
 ## Descrição
 Desenvolvimento do Kernel de um sistema operacional, como projeto final da disciplina de Sistemas Operacionais, seguindo os direcionamentos do livro littleosbook(https://littleosbook.github.io/).
+
 O projeto contempla a construção de um kernel básico com inicialização via bootloader, configuração de IDT e GDT, tratamento de interrupções, Utilização de módulos GRUB, Paginação da memória e um sistema virtual de arquivos em conjunto com um mini-shell.
 
 - Período: 2025.2

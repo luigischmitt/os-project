@@ -9,15 +9,15 @@ Desenvolvimento do Kernel de um sistema operacional, como projeto final da disci
 
 ### No linux (Ubuntu):
 ```bash
-// Instalação dos pacotes necessários
+#Instalação dos pacotes necessários
 sudo apt update
 sudo apt install build-essential libsdl1.2-dev wget tar
 sudo apt-get install build-essential nasm genisoimage bochs bochs-sdl make bochsbios vgabios
-// Instalação do bochs 2.7
+#Instalação do bochs 2.7
 wget https://downloads.sourceforge.net/project/bochs/bochs/2.7/bochs-2.7.tar.gz
 tar xvf bochs-2.7.tar.gz
 cd bochs-2.7
-// Configuração do bochs, forçando a utilização do sdl
+#Configuração do bochs, forçando a utilização do sdl
 sudo ./configure --enable-x86-64 --with-sdl --enable-gdb-stub --enable-all-optimizations
 make -j$(nproc)
 sudo make install

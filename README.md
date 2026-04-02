@@ -1,53 +1,63 @@
-# os-project
+# OS-PROJECT
 
-A minimal x86 operating system kernel built from scratch, following [The Little OS Book](https://littleosbook.github.io/) (chapters 2 and 3).
+## Descrição
+Desenvolvimento do Kernel de um sistema operacional, como projeto final da disciplina de Sistemas Operacionais, seguindo os direcionamentos do livro littleosbook(https://littleosbook.github.io/).
+- Período: 2025.2
+- Professor: Davi Henrique dos Santos
 
-The kernel boots via GRUB using the Multiboot specification, transitions from assembly to C, and writes directly to VGA memory.
+## Requisitos e Dependências:
 
-## What it does
-
-- Loads a Multiboot-compliant ELF kernel through GRUB
-- Enters 32-bit protected mode via the bootloader
-- Calls `kernel_main` from assembly
-- Prints "Hello from kernel_main" to the VGA text buffer at `0xB8000`
-
-## Project structure
-
-```
-src/boot.asm        Multiboot header and entry point (_start)
-src/kernel.c        C kernel with VGA text output
-linker.ld           Linker script (loads kernel at 1 MB)
-iso/boot/grub/      GRUB configuration for bootable ISO
-Makefile            Build and run targets
-Dockerfile          Cross-compilation environment (x86 toolchain)
-```
-
-## Prerequisites
+### No linux (Ubuntu):
+```bash
+// Instalação dos pacotes necessários
+sudo apt update
+sudo apt install build-essential libsdl1.2-dev wget tar
+sudo apt-get install build-essential nasm genisoimage bochs bochs-sdl make bochsbios vgabios
+// Instalação do bochs 2.7
+wget https://downloads.sourceforge.net/project/bochs/bochs/2.7/bochs-2.7.tar.gz
+tar xvf bochs-2.7.tar.gz
+cd bochs-2.7
+// Configuração do bochs, forçando a utilização do sdl
+sudo ./configure --enable-x86-64 --with-sdl --enable-gdb-stub --enable-all-optimizations
 make -j$(nproc)
 sudo make install
-- sudo apt update
-- sudo apt install build-essential libsdl1.2-dev wget tar
-- sudo apt install bochsbios vgabios
-- BOCHS 2.7 : wget https://downloads.sourceforge.net/project/bochs/bochs/2.7/bochs-2.7.tar.gz
-- tar xvf bochs-2.7.tar.gz
-- cd bochs-2.7
-- ./configure --enable-x86-64 --with-sdl --enable-gdb-stub --enable-all-optimizations
-- make -j$(nproc)
-- sudo make install
-## Run
+```
+## Instruções de compilação e execução:
+Para compilar e rodar o projeto:
+```bash
+make run
+```
+Para limpar os arquivos compilados e os arquivos gerados pelo SO:
+```bash
+make clean
+```
+## Estrutura do projeto:
 
-- make run
+```
+include             Diretório que contém os headers do projeto
+source              Diretório que mantém o código c/assembly do projeto
+linker              Diretório que possui o link.ld
 
-## Clean
+source/boot         Contém o código responsável por realizar a inicialização do SO
+source/io           Possui o código responsável pelo framebuffer e pelo serial port
+source/kernel       Mantém o kmain.c, o código principal do kernel
+source/segmentation Contém o código responsável por segmentar a memória ram
+source/interrupt    Contém o código que lida com interrupts do sistema operacional
+source/paging       Contém o código que é responsável por realizar a paginação dentro do C
+source/file         Contém o código que inicializa o sistema virtual de arquivos
+source/shell        Contém o código que inicializa o mini-shell que é utilizado para demonstar o sistema virtual de arquivos
 
-- make clean
+Makefile            Compila e roda os códigos do SO
+```
 
-## References
+## Constribuições individuais:
+
+## Referências:
 
 - [The Little OS Book](https://littleosbook.github.io/)
 - [Multiboot Specification](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 - [OSDev Wiki](https://wiki.osdev.org/)
 
-## License
+## Licença:
 
 [MIT](LICENSE)

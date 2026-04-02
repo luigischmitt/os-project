@@ -17,7 +17,7 @@ typedef enum {
 
 // Representation of the file in the memory ram
 typedef struct iNode{
-    uint32_t inode_number; // ID from 0 to 255
+    uint32_t inode_number; // ID from 0 to MAX_INODES-1
     tNodeType type; // FILE or DIRECTORY
     uint32_t size; // Size of the data (0 in directories)
     uint8_t used; // In use -> 1; Not in use -> 0

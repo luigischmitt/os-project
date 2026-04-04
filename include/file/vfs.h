@@ -40,4 +40,7 @@ int vfs_ls(const char* path);
 int vfs_write(const char* path, const char* content);
 char* vfs_read(const char* path);
 
+// Freeing of the nodes
+void vfs_free_all(void);
+
 #endif // VFS_H

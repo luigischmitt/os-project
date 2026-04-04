@@ -174,6 +174,20 @@ static int shell_verify_command(char* command, char* args){
         }
 
         return 0;
+    } else if(!string_compare(command, "stop")) {
+        // Removes the virtual file system + the inodes from the memory
+        fb_write("Limpando a memoria (VFS/RamFS)...\n");
+        vfs_free_all();
+
+        // Exit message
+        fb_write("Sistema de arquivos desligado com seguranca.\n");
+        fb_write("Pode fechar a janela do Bochs.\n");
+
+        // Locks the processor in Kernel Mode.
+        __asm__ __volatile__("cli"); // Clear interrupts
+        while (1) {
+            __asm__ __volatile__("hlt"); // Makes the processor sleep
+        }
     }
 
     return 1;

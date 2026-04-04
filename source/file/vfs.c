@@ -216,3 +216,41 @@ char* vfs_read(const char* path) {
     serial_write("Arquivo nao encontrado.\n");
     return NULL;
 }
+
+// Aux recursive function that will remove everything in the tree of vfsnodes
+static void vfs_free_tree_recursive(VFSNode* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    // 1. Frees all the children
+    if (node->first_child != NULL) {
+        vfs_free_tree_recursive(node->first_child);
+    }
+
+    // 2. Frees the siblings
+    if (node->next_sibling != NULL) {
+        vfs_free_tree_recursive(node->next_sibling);
+    }
+
+    // 3. Frees the Inode that's related to the current vfsnode
+    ramfs_free_inode(node->inode_number);
+
+    // 4. And frees the current vfsnode
+    kfree(node);
+}
+
+// Function that starts the chain reaction of freeing
+void vfs_free_all(void) {
+    if (root_vnode != NULL) {
+        // Starts the recursive freeing at the root node
+        vfs_free_tree_recursive(root_vnode);
+        
+        // Resets the global pointers
+        root_vnode = NULL;
+        current_vnode = NULL;
+    }
+
+    // Starts the ramfs table with nothing
+    ramfs_init();
+}

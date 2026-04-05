@@ -8,6 +8,15 @@ O projeto contempla a construção de um kernel básico com inicialização via 
 - Período: 2025.2
 - Professor: Davi Henrique dos Santos
 
+## Tecnologias Utilizadas:
+- C
+- Assembly x86
+- GCC 
+- NASM
+- Make
+- GRUB
+- Bochs
+
 ## Requisitos e Dependências:
 
 ### No linux (Ubuntu):
@@ -25,6 +34,7 @@ sudo ./configure --enable-x86-64 --with-sdl --enable-gdb-stub --enable-all-optim
 make -j$(nproc)
 sudo make install
 ```
+
 ## Instruções de compilação e execução:
 Para compilar e rodar o projeto:
 ```bash
@@ -34,6 +44,54 @@ Para limpar os arquivos compilados e os arquivos gerados pelo SO:
 ```bash
 make clean
 ```
+
+## Funcionalidades
+
+- Inicialização do kernel via bootloader GRUB (Multiboot)
+- Geração de imagem ISO bootável via genisoimage
+- Execução em ambiente virtualizado (Bochs)
+- Driver de vídeo em modo texto via framebuffer VGA (80×25)
+- Driver de porta serial COM1 para log/depuração
+- Captura de entrada via teclado (scan code → ASCII)
+- Configuração da GDT (Global Descriptor Table)
+- Configuração da IDT (Interrupt Descriptor Table) para tratamento de interrupções
+- Remapeamento do PIC (Programmable Interrupt Controller)
+- Paginação com modelo Higher-Half Kernel (0xC0100000)
+- Gerenciamento de memória física via bitmap (PMM)
+- Gerenciamento de memória virtual com mapeamento dinâmico de páginas (VMM)
+- Heap do kernel com kmalloc/kfree (lista encadeada de blocos livres)
+- Sistema virtual de arquivos em RAM (VFS + RamFS com inodes)
+- Mini-shell interativo com comandos: ls, cd, mkdir, touch, rm, read, write, pwd, clear, stop
+
+
+## Fluxo De execução:
+
+```
+GRUB (Multiboot)
+  │
+  ▼
+loader.s ─── Paginação inicial + Higher-Half Jump
+  │
+  ▼
+kmain() ─── Inicialização dos subsistemas do kernel
+  │
+  ├── serial_init()        Porta serial COM1
+  ├── gdt_init()           Segmentação (GDT)
+  ├── pic_remap()          Remapeamento do PIC
+  ├── idt_init()           Tabela de interrupções (IDT)
+  ├── sti                  Habilita interrupções
+  ├── pmm_init()           Gerenciador de memória física
+  ├── kheap_init()         Heap do kernel
+  ├── vfs_init()           Sistema virtual de arquivos
+  ├── shell_init()         Mini-shell interativo
+  │
+  ▼
+idle_forever() ─── Loop com interrupções habilitadas (sti; hlt)
+  │
+  ▼ (a cada tecla pressionada)
+IRQ1 → interrupt_handler_33 → read_letter() → shell_handle_key()
+```
+
 ## Estrutura do projeto:
 
 ```
@@ -53,7 +111,9 @@ source/shell        Contém o código que inicializa o mini-shell que é utiliza
 Makefile            Compila e roda os códigos do kernel
 ```
 
-## Constribuições individuais:
+## Contribuições individuais:
+- Cap 1-3: Luigi, Kevin, Luís
+- 
 
 ## Referências:
 

@@ -217,6 +217,10 @@ char* vfs_read(const char* path) {
     return NULL;
 }
 
+// ==========================================
+// VFS Tree free functions
+// ==========================================
+
 // Aux recursive function that will remove everything in the tree of vfsnodes
 static void vfs_free_tree_recursive(VFSNode* node) {
     if (node == NULL) {

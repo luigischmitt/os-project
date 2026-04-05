@@ -113,7 +113,12 @@ Makefile            Compila e roda os códigos do kernel
 
 ## Contribuições individuais:
 - Cap 1-3: Luigi, Kevin, Luís
-- 
+- Cap 4: Luís
+- Cap 5: Luigi
+- Cap 6: Kevin
+- Cap 7: Luigi, Kevin, Luís
+- Cap 8-10: Luigi, Kevin, Luís
+- Sistema de Arquivos + Mini-Shell: Luigi, Kevin, Luís
 
 ## Referências:
 

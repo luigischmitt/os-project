@@ -55,4 +55,4 @@ run: os.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf $(OBJECTS) *.out out/* iso/modules/program $(KERNEL_BIN)
+	rm -rf $(OBJECTS) *.o *.out out/* iso/modules/program $(KERNEL_BIN)

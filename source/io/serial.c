@@ -1,6 +1,6 @@
 #include "io/io.h"
 #include "io/serial.h"
-
+#include <io/utils.h>
 
 /* COM1 base */
 #define SERIAL_COM1_BASE 0x3F8
@@ -64,8 +64,9 @@ void serial_write_char(char c) // Function to write a char with the serial port
     outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), c);
 }
 
-int serial_write(char *buf, unsigned int len) // Function to write with the serial port
+int serial_write(char *buf) // Function to write with the serial port
 {
+    uint32_t len = string_length(buf);
     for (unsigned int i = 0; i < len; i++) {
         serial_write_char(buf[i]);
     }

@@ -4,3 +4,5 @@ iso/modules/program
 out/*
 *.o
 *.out
+*.elf
+*.iso

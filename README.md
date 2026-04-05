@@ -1,14 +1,17 @@
 # OS-PROJECT
 
 ## Descrição
+
 Desenvolvimento do Kernel de um sistema operacional, como projeto final da disciplina de Sistemas Operacionais, seguindo os direcionamentos do livro littleosbook(https://littleosbook.github.io/).
 
 O projeto contempla a construção de um kernel básico com inicialização via bootloader, configuração de IDT e GDT, tratamento de interrupções, Utilização de módulos GRUB, Paginação da memória e um sistema virtual de arquivos em conjunto com um mini-shell.
 
 - Período: 2025.2
 - Professor: Davi Henrique dos Santos
+- Grupo: 08
 
 ## Tecnologias Utilizadas:
+
 - C
 - Assembly x86
 - GCC 
@@ -20,6 +23,7 @@ O projeto contempla a construção de um kernel básico com inicialização via 
 ## Requisitos e Dependências:
 
 ### No linux (Ubuntu):
+
 ```bash
 #Instalação dos pacotes necessários
 sudo apt update
@@ -36,6 +40,7 @@ sudo make install
 ```
 
 ## Instruções de compilação e execução:
+
 Para compilar e rodar o projeto:
 ```bash
 make run
@@ -112,6 +117,7 @@ Makefile            Compila e roda os códigos do kernel
 ```
 
 ## Contribuições individuais:
+
 - Cap 1-3: Luigi, Kevin, Luís
 - Cap 4: Luís
 - Cap 5: Luigi
